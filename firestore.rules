@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'drive5746@gmail.com'
+      );
+    }
+
+    function isValidReservation(data) {
+      return (data.name is string || data.userName is string) &&
+             data.phone is string && data.phone.size() <= 50 &&
+             data.carNumber is string && data.carNumber.size() <= 50 &&
+             (data.exitDate is string || data.arrivalDate is string) &&
+             (data.entryDate is string || data.departureDate is string) &&
+             data.status in ['pending', 'confirmed', 'cancelled', '입고예정', '입고완료', '출고완료', '취소'];
+    }
+
+    // Site Settings: Public read, Admin write
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Reservations: Public create, Signed-in read/list, Admin update/delete
+    match /reservations/{reservationId} {
+      allow create: if isValidReservation(request.resource.data) && 
+                      (request.resource.data.status == 'pending' || request.resource.data.status == '입고예정');
+      allow read, list: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Admins: Only admins can manage admins
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
