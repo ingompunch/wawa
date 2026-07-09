@@ -92,21 +92,7 @@ export const Home = () => {
                 }
             }
 
-            // 야간 할증 20,000원 (19:00~05:00 입·출고 시)
-            const checkSurchargeHour = (hour24: number, min: number) => {
-                return hour24 >= 19 || hour24 < 5;
-            };
-
-            const isEntrySurcharged = checkSurchargeHour(entryHour, entryMin);
-            const isExitSurcharged = checkSurchargeHour(exitHour, exitMin);
-
-            if (isEntrySurcharged) {
-                price += 20000;
-            }
-            if (isExitSurcharged) {
-                price += 20000;
-            }
-
+            // 야간 할증 무료 이벤트 적용 (0원 가산)
             setTotalPrice(price);
         } else {
             setTotalPrice(null);
@@ -378,8 +364,8 @@ export const Home = () => {
                                         <span className="break-keep">공항도착 30분전 전화주세요.</span>
                                     </div>
                                     <div className="flex items-start gap-1.5 leading-snug">
-                                        <span className="text-[#FFB800] mt-0.5 font-bold">•</span>
-                                        <span className="font-extrabold text-[#FF6600]">새벽/야간 할증: 입·출차 시간 중 하나라도 오후 19시~새벽 04:59(05시 정각 제외) 사이에 해당 시 총액에 2만원 추가</span>
+                                        <span className="text-emerald-500 mt-0.5 font-bold">•</span>
+                                        <span className="font-extrabold text-emerald-600">새벽/야간 할증 없음 (야간 및 새벽 할증료 0원 면제 혜택)</span>
                                     </div>
                                     <div className="flex items-start gap-1.5 leading-snug">
                                         <span className="text-[#FFB800] mt-0.5 font-bold">•</span>

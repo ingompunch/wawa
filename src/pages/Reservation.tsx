@@ -302,20 +302,14 @@ export const Reservation = () => {
       }
     }
 
-    // Checking entry / exit surcharges (야간 할증 10,000원 (19:00~05:00 입·출고 시))
+    // Checking entry / exit surcharges (야간 할증 무료 이벤트 적용으로 요금 가산 없음)
     const isEntrySurcharged = checkSurcharge(formData.entryAmPm, formData.entryHour, formData.entryMin);
     const isExitSurcharged = checkSurcharge(formData.exitAmPm, formData.exitHour, formData.exitMin);
 
     setEntrySurchargeApplied(isEntrySurcharged);
     setExitSurchargeApplied(isExitSurcharged);
 
-    // 20,000 won added for each surcharge applied
-    if (isEntrySurcharged) {
-      calculatedBaseFee += 20000;
-    }
-    if (isExitSurcharged) {
-      calculatedBaseFee += 20000;
-    }
+    // 야간/새벽 할증료 0원 (이벤트 무료 면제)
 
     setDaysCount(diffDays);
     setTotalPrice(calculatedBaseFee);
@@ -1113,7 +1107,7 @@ export const Reservation = () => {
                   <p>1) 실외 주차 요금: 1~2일 기본요금 40,000원, 3일째부터 하루당 5,000원씩 누적 합산</p>
                   <p>2) 실내 주차 요금: 1~2일 기본요금 40,000원, 3일째부터 하루당 10,000원씩 누적 합산</p>
                   
-                  <p className="font-extrabold text-[#FFD500] text-[11px] mt-1">• 새벽/야간 할증: 입차 또는 출차 시간 중 하나라도 19:00 ~ 05:00 사이에 해당 시 각각 20,000원씩 할증 적용됩니다.</p>
+                  <p className="font-extrabold text-emerald-400 text-[11px] mt-1">• 새벽/야간 할증: 추가 요금 없음 (야간/새벽 할증 0원 면제 혜택)</p>
 
                   <p className="font-extrabold text-white text-xs mt-2">제 3조 (귀책사유 및 보험 보상 범위)</p>
                   <p>① 당사의 서비스제공 기간 중 당사직원의 고의 또는 과실로 인하여 발생한 차량 손해에 대해 손해 전액을 배상하며 단 차량인도 인도 후에는 차량손해에 대해 책임지지 않는다.</p>
@@ -1188,18 +1182,18 @@ export const Reservation = () => {
 
                 {/* Surcharges breakdown */}
                 {daysCount !== null && (entrySurchargeApplied || exitSurchargeApplied) && (
-                  <div className="bg-white/5 p-3 rounded-xl border border-white/10 space-y-2 mt-2">
-                    <span className="text-[10px] font-black tracking-widest text-[#FFD500] block">추가 할증 요금 내역</span>
+                  <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20 space-y-2 mt-2">
+                    <span className="text-[10px] font-black tracking-widest text-emerald-400 block font-black">야간/새벽 할증 면제 혜택 적용</span>
                     {entrySurchargeApplied && (
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-300">야간 입고 할증 (19:00 ~ 05:00)</span>
-                        <span className="font-bold text-[#FFD500]">+20,000원</span>
+                        <span className="font-black text-emerald-400">0원 (무료 면제)</span>
                       </div>
                     )}
                     {exitSurchargeApplied && (
                       <div className="flex justify-between items-center text-[11px]">
                         <span className="text-slate-300">야간 출고 할증 (19:00 ~ 05:00)</span>
-                        <span className="font-bold text-[#FFD500]">+20,000원</span>
+                        <span className="font-black text-emerald-400">0원 (무료 면제)</span>
                       </div>
                     )}
                   </div>

@@ -74,14 +74,14 @@ export const Fees = () => {
                                     <p className="text-xs font-medium text-slate-500 leading-relaxed">입출차 시 기사님 대행료(발렛비)가 포함된 최종 요금입니다. 추가 대행료가 발생하지 않습니다.</p>
                                 </div>
                             </div>
-                            <div className="flex items-start gap-3 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-6">
-                                <div className="bg-red-50 p-1.5 rounded-lg text-red-600 shrink-0 mt-0.5 animate-pulse">
-                                    <Info size={16} />
+                             <div className="flex items-start gap-3 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:pl-6">
+                                <div className="bg-emerald-50 p-1.5 rounded-lg text-emerald-600 shrink-0 mt-0.5">
+                                    <Sparkles size={16} />
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-sm font-black text-red-600">새벽/야간 할증 안내</p>
+                                    <p className="text-sm font-black text-emerald-600">야간/새벽 할증료 0원 이벤트</p>
                                     <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                                        <span className="font-bold text-slate-700">19:00 ~ 05:00</span> 사이 입고 또는 출고 시, <span className="font-bold text-red-600">각각 20,000원</span>의 야간 할증 요금이 적용됩니다. (입/출고 모두 야간 시간일 시 총 40,000원 적용)
+                                        고객 감사 이벤트 적용으로 <span className="font-bold text-slate-700">19:00 ~ 05:00</span> 사이 입고 또는 출고 시에도 <span className="font-bold text-emerald-600">추가 할증료가 전혀 발생하지 않습니다.</span>
                                     </p>
                                 </div>
                             </div>
