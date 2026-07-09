@@ -5,6 +5,19 @@ import { useState, useEffect } from 'react';
 export const INITIAL_SITE_DATA = {
   reservationLink: 'https://itcha.kr',
   phone: '010-5353-4781',
+  topBanner: {
+    show: true,
+    text: '🔥 [여름 성수기 사전예약 할인] 지금 바로 예약하시면 야외 1일 5,000원 / 실내 1일 10,000원에 안심 주차가 가능합니다!',
+    link: '/reservation'
+  },
+  popupBanner: {
+    show: true,
+    title: '밤늦게 도착해도, 새벽에 출발해도 추가금 제로!',
+    content: '와와주차대행은 새벽이나 야간이나 추가 요금 없이\n365일 주야간 동일 요금으로 운영됩니다.\n새벽 비행기도, 늦은 연착도 안심하고 다녀오세요!',
+    link: '/reservation',
+    linkText: '안심 예약하기',
+    closeForeverText: '오늘 하루 열지 않기'
+  },
   home: {
     heroTitle: '와와 주차대행\n실내·야외 맞춤형 안심 주차',
     heroSub: '인천공항 안심 주차의 기준, 실내·야외 맞춤형 프리미엄 발렛.\nADT 캡스 철통 보안과 전직원 탁송 보험으로 가장 안전하게 모십니다.',
@@ -77,6 +90,8 @@ export function sanitizeSiteData(data: any): any {
   if (!data) return INITIAL_SITE_DATA;
   const cleaned = { ...data };
   
+  if (!cleaned.topBanner) cleaned.topBanner = { ...INITIAL_SITE_DATA.topBanner };
+  if (!cleaned.popupBanner) cleaned.popupBanner = { ...INITIAL_SITE_DATA.popupBanner };
   if (!cleaned.home) cleaned.home = { ...INITIAL_SITE_DATA.home };
   if (!cleaned.intro) cleaned.intro = { ...INITIAL_SITE_DATA.intro };
   if (!cleaned.guide) cleaned.guide = { ...INITIAL_SITE_DATA.guide };

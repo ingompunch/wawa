@@ -22,7 +22,8 @@ import {
   CheckCircle2,
   List,
   Plus,
-  Trash2
+  Trash2,
+  Bell
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -30,6 +31,19 @@ import { motion, AnimatePresence } from 'motion/react';
 const INITIAL_SITE_DATA = {
   reservationLink: 'https://itcha.kr',
   phone: '010-5353-4781',
+  topBanner: {
+    show: true,
+    text: '🔥 [여름 성수기 사전예약 할인] 지금 바로 예약하시면 야외 1일 5,000원 / 실내 1일 10,000원에 안심 주차가 가능합니다!',
+    link: '/reservation'
+  },
+  popupBanner: {
+    show: true,
+    title: '밤늦게 도착해도, 새벽에 출발해도 추가금 제로!',
+    content: '와와주차대행은 새벽이나 야간이나 추가 요금 없이\n365일 주야간 동일 요금으로 운영됩니다.\n새벽 비행기도, 늦은 연착도 안심하고 다녀오세요!',
+    link: '/reservation',
+    linkText: '안심 예약하기',
+    closeForeverText: '오늘 하루 열지 않기'
+  },
   home: {
     heroTitle: '와와 주차대행\n실내·야외 맞춤형 안심 주차',
     heroSub: '인천공항 안심 주차의 기준, 실내·야외 맞춤형 프리미엄 발렛.\nADT 캡스 철통 보안과 전직원 탁송 보험으로 가장 안전하게 모십니다.',
@@ -107,6 +121,29 @@ export const Admin = () => {
     const [activeTab, setActiveTab] = useState('general');
     const [isSaving, setIsSaving] = useState(false);
     const [reservations, setReservations] = useState<any[]>([]); // Keep keeping trace of reservations just in case
+    const [loginError, setLoginError] = useState<string | null>(null);
+
+    const handleGoogleLogin = async () => {
+        setLoginError(null);
+        try {
+            await signInWithGoogle();
+        } catch (error: any) {
+            console.error("Google sign in error:", error);
+            let errMsg = "로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+            if (error.code === 'auth/popup-blocked' || error.message?.includes('popup')) {
+                errMsg = "브라우저에 의해 팝업 창이 차단되었거나, 미리보기 창 내부 제약으로 로그인창이 열리지 않았습니다. 화면 상단의 [새 창(New Tab)에서 열기] 버튼을 클릭해 새 탭에서 로그인해 주시거나 브라우저 팝업 차단을 해제해 주세요.";
+            } else if (error.code === 'auth/unauthorized-domain') {
+                errMsg = `승인되지 않은 도메인입니다. Firebase 콘솔 > Authentication > Settings > Authorized domains에 현재 도메인(${window.location.hostname})을 추가해 주세요.`;
+            } else if (error.code === 'auth/operation-not-allowed') {
+                errMsg = "Firebase 콘솔에서 Google 로그인 제공업체(Provider)가 비활성화되어 있습니다. Authentication > Sign-in method에서 Google을 활성화해 주세요.";
+            } else if (error.message?.includes('network-request-failed')) {
+                errMsg = "네트워크 연결 오류가 발생했습니다. 네트워크 상태를 확인하시거나 브라우저 캐시를 비우고 다시 시도해 주세요.";
+            } else {
+                errMsg = `에러가 발생했습니다: ${error.message || error.code || error}`;
+            }
+            setLoginError(errMsg);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -165,11 +202,17 @@ export const Admin = () => {
                         </p>
                     </div>
                     <button 
-                        onClick={signInWithGoogle}
+                        onClick={handleGoogleLogin}
                         className="w-full bg-white text-slate-900 py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 hover:bg-slate-100 transition-all active:scale-95"
                     >
                          Google 로그인
                     </button>
+                    {loginError && (
+                        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-5 rounded-2xl text-xs font-semibold text-left leading-relaxed whitespace-pre-line animate-fade-in space-y-1.5">
+                            <p className="font-black text-rose-300">⚠️ 로그인할 수 없습니다</p>
+                            <p>{loginError}</p>
+                        </div>
+                    )}
                     <p className="text-xs text-slate-700 font-bold tracking-widest uppercase">WAWA CMS CONSOLE</p>
                 </div>
             </div>
@@ -272,6 +315,189 @@ export const Admin = () => {
                                             value={siteData.phone || '010-5353-4781'}
                                             onChange={(e) => setSiteData({...siteData, phone: e.target.value})}
                                         />
+                                    </div>
+
+                                    {/* 탑 공지 띠 배너 설정 */}
+                                    <div className="pt-8 border-t border-slate-100 space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h5 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                                                    <Bell size={16} className="text-[#FFD500]" /> 홈페이지 상단 공지 띠 배너 (Announcement Bar)
+                                                </h5>
+                                                <p className="text-xs text-slate-400 font-medium">메인 페이지 최상단에 마케팅 문구나 성수기 공지용 배너를 활성화합니다.</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSiteData({
+                                                    ...siteData,
+                                                    topBanner: {
+                                                        ...(siteData.topBanner || { text: '', link: '' }),
+                                                        show: !siteData.topBanner?.show
+                                                    }
+                                                })}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-xl text-xs font-black transition-all",
+                                                    siteData.topBanner?.show
+                                                        ? "bg-emerald-500 text-white"
+                                                        : "bg-slate-200 text-slate-500"
+                                                )}
+                                            >
+                                                {siteData.topBanner?.show ? '배너 노출 중 (ON)' : '배너 숨김 (OFF)'}
+                                            </button>
+                                        </div>
+
+                                        {siteData.topBanner?.show && (
+                                            <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100 animate-fade-in">
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-slate-600 pl-1">배너 안내 문구</label>
+                                                    <input 
+                                                        type="text"
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500]"
+                                                        value={siteData.topBanner?.text || ''}
+                                                        onChange={(e) => setSiteData({
+                                                            ...siteData,
+                                                            topBanner: {
+                                                                ...(siteData.topBanner || { show: true, link: '' }),
+                                                                text: e.target.value
+                                                            }
+                                                        })}
+                                                        placeholder="예: 🔥 [여름 성수기 사전예약 할인] 지금 바로 예약하시면 최대 10% 추가 혜택!"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-slate-600 pl-1">배너 클릭 시 이동할 경로 (비워두면 버튼 미노출)</label>
+                                                    <input 
+                                                        type="text"
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500]"
+                                                        value={siteData.topBanner?.link || ''}
+                                                        onChange={(e) => setSiteData({
+                                                            ...siteData,
+                                                            topBanner: {
+                                                                ...(siteData.topBanner || { show: true, text: '' }),
+                                                                link: e.target.value
+                                                            }
+                                                        })}
+                                                        placeholder="예: /reservation (예약 페이지로 이동)"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 홈페이지 중앙 레이어 팝업 설정 */}
+                                    <div className="pt-8 border-t border-slate-100 space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h5 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
+                                                    <Eye size={16} className="text-[#FFD500]" /> 홈페이지 중앙 팝업 배너 (Popup Modal)
+                                                </h5>
+                                                <p className="text-xs text-slate-400 font-medium">메인 페이지 방문 시 중앙에 모달 레이어로 중요 소식이나 이벤트를 알립니다.</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSiteData({
+                                                    ...siteData,
+                                                    popupBanner: {
+                                                        ...(siteData.popupBanner || { title: '', content: '', link: '', linkText: '', closeForeverText: '' }),
+                                                        show: !siteData.popupBanner?.show
+                                                    }
+                                                })}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-xl text-xs font-black transition-all",
+                                                    siteData.popupBanner?.show
+                                                        ? "bg-emerald-500 text-white"
+                                                        : "bg-slate-200 text-slate-500"
+                                                )}
+                                            >
+                                                {siteData.popupBanner?.show ? '팝업 노출 중 (ON)' : '팝업 숨김 (OFF)'}
+                                            </button>
+                                        </div>
+
+                                        {siteData.popupBanner?.show && (
+                                            <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100 animate-fade-in">
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-slate-600 pl-1">팝업 제목</label>
+                                                    <input 
+                                                        type="text"
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500]"
+                                                        value={siteData.popupBanner?.title || ''}
+                                                        onChange={(e) => setSiteData({
+                                                            ...siteData,
+                                                            popupBanner: {
+                                                                ...(siteData.popupBanner || { show: true, content: '', link: '', linkText: '', closeForeverText: '' }),
+                                                                title: e.target.value
+                                                            }
+                                                        })}
+                                                        placeholder="예: 📢 야간/새벽 할증료 0원 안내"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-slate-600 pl-1">팝업 상세 내용 (\n으로 줄바꿈)</label>
+                                                    <textarea 
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500] h-32"
+                                                        value={siteData.popupBanner?.content || ''}
+                                                        onChange={(e) => setSiteData({
+                                                            ...siteData,
+                                                            popupBanner: {
+                                                                ...(siteData.popupBanner || { show: true, title: '', link: '', linkText: '', closeForeverText: '' }),
+                                                                content: e.target.value
+                                                            }
+                                                        })}
+                                                        placeholder="예: 고객님의 편안한 여행을 위해 야간 및 새벽 할증료를 일절 받지 않습니다."
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-bold text-slate-600 pl-1">이동 버튼 문구</label>
+                                                        <input 
+                                                            type="text"
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500]"
+                                                            value={siteData.popupBanner?.linkText || ''}
+                                                            onChange={(e) => setSiteData({
+                                                                ...siteData,
+                                                                popupBanner: {
+                                                                    ...(siteData.popupBanner || { show: true, title: '', content: '', link: '', closeForeverText: '' }),
+                                                                    linkText: e.target.value
+                                                                }
+                                                            })}
+                                                            placeholder="예: 안심 예약하기"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <label className="text-xs font-bold text-slate-600 pl-1">이동 경로 (비워두면 버튼 미노출)</label>
+                                                        <input 
+                                                            type="text"
+                                                            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-2 focus:ring-[#FFD500]"
+                                                            value={siteData.popupBanner?.link || ''}
+                                                            onChange={(e) => setSiteData({
+                                                                ...siteData,
+                                                                popupBanner: {
+                                                                    ...(siteData.popupBanner || { show: true, title: '', content: '', linkText: '', closeForeverText: '' }),
+                                                                    link: e.target.value
+                                                                }
+                                                            })}
+                                                            placeholder="예: /reservation"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-xs font-bold text-slate-600 pl-1">오늘 하루 안보기 버튼 문구</label>
+                                                    <input 
+                                                        type="text"
+                                                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-bold text-sm outline-none focus:ring-[#FFD500]"
+                                                        value={siteData.popupBanner?.closeForeverText || ''}
+                                                        onChange={(e) => setSiteData({
+                                                            ...siteData,
+                                                            popupBanner: {
+                                                                ...(siteData.popupBanner || { show: true, title: '', content: '', link: '', linkText: '' }),
+                                                                closeForeverText: e.target.value
+                                                            }
+                                                        })}
+                                                        placeholder="예: 오늘 하루 열지 않기"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
