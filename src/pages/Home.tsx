@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { 
   ShieldCheck, 
   Clock, 
@@ -10,8 +10,7 @@ import {
   Star,
   Award,
   Video,
-  Phone,
-  X
+  Phone
 } from 'lucide-react';
 import { cn, formatPrice } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
@@ -27,22 +26,6 @@ export const Home = () => {
     const [exitTime, setExitTime] = useState('10:00');
     const [parkingType, setParkingType] = useState<'outdoor' | 'indoor'>('indoor');
     const [totalPrice, setTotalPrice] = useState<number | null>(null);
-    const [showPopup, setShowPopup] = useState(false);
-
-    useEffect(() => {
-        if (siteData && siteData.popupBanner?.show) {
-            const expiry = localStorage.getItem('hide_popup_until');
-            if (!expiry || new Date().getTime() > Number(expiry)) {
-                setShowPopup(true);
-            }
-        }
-    }, [siteData]);
-
-    const closePopupForever = () => {
-        const twentyFourHours = 24 * 60 * 60 * 1000;
-        localStorage.setItem('hide_popup_until', String(new Date().getTime() + twentyFourHours));
-        setShowPopup(false);
-    };
 
     useEffect(() => {
         if (entryDate && exitDate && siteData) {
@@ -92,7 +75,21 @@ export const Home = () => {
                 }
             }
 
-            // 야간 할증 무료 이벤트 적용 (0원 가산)
+            // 야간 할증 20,000원 (19:00~05:00 입·출고 시)
+            const checkSurchargeHour = (hour24: number, min: number) => {
+                return hour24 >= 19 || hour24 < 5;
+            };
+
+            const isEntrySurcharged = checkSurchargeHour(entryHour, entryMin);
+            const isExitSurcharged = checkSurchargeHour(exitHour, exitMin);
+
+            if (isEntrySurcharged) {
+                price += 20000;
+            }
+            if (isExitSurcharged) {
+                price += 20000;
+            }
+
             setTotalPrice(price);
         } else {
             setTotalPrice(null);
@@ -103,107 +100,6 @@ export const Home = () => {
 
     return (
         <div className="overflow-x-hidden">
-            {/* Popup Banner Overlay Modal */}
-            <AnimatePresence>
-                {showPopup && siteData.popupBanner?.show && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        {/* Backdrop with fade-in and subtle blur */}
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setShowPopup(false)}
-                            className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
-                        />
-                        
-                        {/* Modal container with scale-up and fade-in */}
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 15 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-                            className="relative bg-white text-slate-900 rounded-[32px] max-w-md w-full overflow-hidden border border-slate-100 shadow-2xl z-10 flex flex-col"
-                        >
-                            {/* Accent line */}
-                            <div className="h-2 bg-[#FFD500]" />
-
-                            {/* Close button (top-right icon) */}
-                            <button 
-                                type="button"
-                                onClick={() => setShowPopup(false)}
-                                className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-full hover:bg-slate-50"
-                            >
-                                <X size={20} />
-                            </button>
-
-                            {/* Header Image/Icon Section */}
-                            <div className="bg-slate-950 p-8 text-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-b from-[#FFD500]/5 to-transparent pointer-events-none" />
-                                
-                                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#FFD500]/10 border border-[#FFD500]/30 text-[#FFD500] mb-4">
-                                    <Clock size={28} className="animate-pulse" />
-                                </div>
-                                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug whitespace-pre-line break-keep">
-                                    {siteData.popupBanner.title || '📢 야간/새벽 할증료 0원 안내'}
-                                </h3>
-                            </div>
-
-                            {/* Content Body */}
-                            <div className="p-8 text-center flex-1 space-y-6">
-                                <p className="text-slate-600 font-bold text-sm sm:text-base leading-relaxed whitespace-pre-line break-keep">
-                                    {siteData.popupBanner.content || '고객님들의 편안한 여행을 위해\n와와주차대행은 야간 및 새벽 할증료가 전혀 없습니다!\n\n언제 어느 시간대든 주야간 동일 요금으로\n정직하고 안전하게 발렛 주차를 서비스해 드립니다.'}
-                                </p>
-
-                                {siteData.popupBanner.link && (
-                                    <Link 
-                                        to={siteData.popupBanner.link} 
-                                        onClick={() => setShowPopup(false)}
-                                        className="w-full bg-[#FFD500] text-slate-900 hover:bg-slate-900 hover:text-[#FFD500] transition-all px-4 py-4 rounded-2xl font-black text-sm text-center flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/10 hover:shadow-xl"
-                                    >
-                                        {siteData.popupBanner.linkText || '안심 예약하기'} &rarr;
-                                    </Link>
-                                )}
-                            </div>
-
-                            {/* Footer Options */}
-                            <div className="bg-slate-50 border-t border-slate-100 px-6 py-4 flex items-center justify-between text-xs font-bold text-slate-400">
-                                <button 
-                                    type="button" 
-                                    onClick={closePopupForever}
-                                    className="hover:text-slate-600 transition-colors py-1 pl-1"
-                                >
-                                    {siteData.popupBanner.closeForeverText || '오늘 하루 열지 않기'}
-                                </button>
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowPopup(false)}
-                                    className="hover:text-slate-600 transition-colors py-1 pr-1 font-black text-slate-500"
-                                >
-                                    닫기
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* Top Announcement Banner */}
-            {siteData.topBanner?.show && (
-                <div className="bg-[#FFD500] text-slate-900 px-4 py-3 text-center text-xs sm:text-sm font-black tracking-tight flex items-center justify-center gap-2 relative z-30 border-b border-slate-900/10 whitespace-pre-wrap break-keep shadow-sm">
-                    <span className="flex items-center gap-1.5 justify-center">
-                        {siteData.topBanner.text}
-                    </span>
-                    {siteData.topBanner.link && (
-                        <Link 
-                            to={siteData.topBanner.link} 
-                            className="bg-slate-900 text-[#FFD500] px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-black shrink-0 hover:bg-slate-800 transition-colors ml-1"
-                        >
-                            예약하기 &rarr;
-                        </Link>
-                    )}
-                </div>
-            )}
-
             {/* Hero Section */}
             <section className="relative bg-slate-950 py-10 sm:py-20 px-4 sm:px-8 animate-fade-in">
                 {/* BG Decoration */}
@@ -364,8 +260,8 @@ export const Home = () => {
                                         <span className="break-keep">공항도착 30분전 전화주세요.</span>
                                     </div>
                                     <div className="flex items-start gap-1.5 leading-snug">
-                                        <span className="text-emerald-500 mt-0.5 font-bold">•</span>
-                                        <span className="font-extrabold text-emerald-600">새벽/야간 할증 없음 (야간 및 새벽 할증료 0원 면제 혜택)</span>
+                                        <span className="text-[#FFB800] mt-0.5 font-bold">•</span>
+                                        <span className="font-extrabold text-[#FF6600]">새벽/야간 할증: 입·출차 시간 중 하나라도 오후 19시~새벽 04:59(05시 정각 제외) 사이에 해당 시 총액에 2만원 추가</span>
                                     </div>
                                     <div className="flex items-start gap-1.5 leading-snug">
                                         <span className="text-[#FFB800] mt-0.5 font-bold">•</span>
