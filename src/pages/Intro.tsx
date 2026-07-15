@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Camera, MapPin, Shield, CheckCircle } from 'lucide-react';
 import { useSiteData } from '../lib/siteService';
+import parkingFacilityImg from '../assets/images/parking_facility_1784129749862.jpg';
 
 export const Intro = () => {
     const { data: siteData, loading } = useSiteData();
@@ -45,7 +46,7 @@ export const Intro = () => {
                         <div className="relative group">
                             <div className="absolute -inset-4 bg-[#FFD500]/20 rounded-[3rem] blur-2xl group-hover:bg-[#FFD500]/40 transition-all" />
                             <img 
-                                src="https://images.unsplash.com/photo-1590674899484-13da0d1b58f5?q=80&w=1200&auto=format&fit=crop" 
+                                src={parkingFacilityImg} 
                                 alt="Parking Facility" 
                                 referrerPolicy="no-referrer"
                                 className="relative z-10 w-full h-[400px] object-cover rounded-[2.5rem] shadow-2xl"

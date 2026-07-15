@@ -2,6 +2,8 @@ import React from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Phone, CheckCircle2, ChevronRight, Car, Key, MapPin } from 'lucide-react';
 import { useSiteData } from '../lib/siteService';
+import departureImg from '../assets/images/airport_departure_1784129768111.jpg';
+import arrivalImg from '../assets/images/airport_arrival_1784129786095.jpg';
 
 export const Guide = () => {
     const { data: siteData, loading } = useSiteData();
@@ -58,7 +60,7 @@ export const Guide = () => {
                         </div>
                         <div className="order-1 md:order-2 bg-white p-4 rounded-[2.5rem] shadow-xl border border-slate-100">
                              <img 
-                                src="https://images.unsplash.com/photo-1541899481282-d53bffe3c15d?q=80&w=800&auto=format&fit=crop" 
+                                src={departureImg} 
                                 alt="Departure" 
                                 referrerPolicy="no-referrer"
                                 className="w-full h-64 object-cover rounded-[2rem]"
@@ -70,7 +72,7 @@ export const Guide = () => {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                          <div className="bg-white p-4 rounded-[2.5rem] shadow-xl border border-slate-100">
                              <img 
-                                src="https://images.unsplash.com/photo-1506521781263-d8422e82f27a?q=80&w=800&auto=format&fit=crop" 
+                                src={arrivalImg} 
                                 alt="Arrival" 
                                 referrerPolicy="no-referrer"
                                 className="w-full h-64 object-cover rounded-[2rem]"
