@@ -32,10 +32,10 @@ export const Footer = () => {
                 <a 
                   href="https://www.에어픽.kr/parking" 
                   target="_blank" 
-                  rel="noopener noreferrer" 
+                  rel="sponsored noopener noreferrer" 
                   className="hover:text-[#FFD500] transition-colors text-slate-300 font-bold flex items-center gap-1 text-[13px]"
                 >
-                  에어픽 입점 · 요금 비교 · 예약 ↗
+                  주차대행인증 에어픽 입점 ↗
                 </a>
               </li>
             </ul>

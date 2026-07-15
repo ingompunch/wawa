@@ -76,17 +76,17 @@ export const Intro = () => {
                         <div className="space-y-1 text-center sm:text-left">
                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                                 <span className="inline-block bg-[#FFD500] text-slate-900 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider">안심 파트너 제휴</span>
-                                <h4 className="text-sm font-bold tracking-tight text-slate-900">주차대행 비교 플랫폼 에어픽 입점</h4>
+                                <h4 className="text-sm font-bold tracking-tight text-slate-900">주차대행 검증 플랫폼 에어픽 정식 입점</h4>
                             </div>
-                            <p className="text-xs text-slate-500 font-medium">에어픽에서 와와 주차대행의 실시간 요금을 직접 비교하고 간편하게 예약하실 수 있습니다.</p>
+                            <p className="text-xs text-slate-500 font-medium">검증된 안심 주차 플랫폼 에어픽에서 실시간 정보 비교와 간편 예약 서비스를 제공합니다.</p>
                         </div>
                         <a 
                             href="https://www.에어픽.kr/parking" 
                             target="_blank" 
-                            rel="noopener noreferrer"
+                            rel="sponsored noopener noreferrer"
                             className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 shadow-sm active:scale-95"
                         >
-                            에어픽 입점 · 요금 비교 · 예약 바로가기
+                            에어픽 확인하기
                             <ChevronRight size={14} />
                         </a>
                     </div>
