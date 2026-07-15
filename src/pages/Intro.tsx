@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Camera, MapPin, Shield, CheckCircle } from 'lucide-react';
+import { Camera, MapPin, Shield, CheckCircle, ChevronRight } from 'lucide-react';
 import { useSiteData } from '../lib/siteService';
 import parkingFacilityImg from '../assets/images/parking_facility_1784129749862.jpg';
 
@@ -54,7 +54,7 @@ export const Intro = () => {
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8 mb-12">
                         {(siteData.intro.features || [
                             { title: '화재 및 배상 책임', desc: '만일의 사고에 대비하여 삼성화재 대물/대인 배상 보험에 완벽 가입되어 있습니다.' },
                             { title: '24H CCTV 모니터링', desc: '사각지대 없는 CCTV 설치로 실시간 보안팀에서 24시간 철저하게 감시합니다.' },
@@ -69,6 +69,26 @@ export const Intro = () => {
                                 </div>
                             );
                         })}
+                    </div>
+
+                    {/* Airpick Promotion CTA Banner (Smaller and subtler) */}
+                    <div className="bg-slate-50 rounded-[1.5rem] p-5 text-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-100 shadow-sm">
+                        <div className="space-y-1 text-center sm:text-left">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                <span className="inline-block bg-[#FFD500] text-slate-900 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider">안심 파트너 제휴</span>
+                                <h4 className="text-sm font-bold tracking-tight text-slate-900">주차대행 비교 플랫폼 에어픽 입점</h4>
+                            </div>
+                            <p className="text-xs text-slate-500 font-medium">에어픽에서 와와 주차대행의 실시간 요금을 직접 비교하고 간편하게 예약하실 수 있습니다.</p>
+                        </div>
+                        <a 
+                            href="https://www.에어픽.kr/parking" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 shadow-sm active:scale-95"
+                        >
+                            에어픽 입점 · 요금 비교 · 예약 바로가기
+                            <ChevronRight size={14} />
+                        </a>
                     </div>
                 </div>
             </div>

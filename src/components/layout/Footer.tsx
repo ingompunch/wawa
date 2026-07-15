@@ -28,6 +28,16 @@ export const Footer = () => {
               <li><a href="/guide" className="hover:text-[#FFD500] transition-colors">이용안내</a></li>
               <li><a href="/fees" className="hover:text-[#FFD500] transition-colors">주차요금</a></li>
               <li><a href="/reservation" className="hover:text-[#FFD500] transition-colors">온라인예약</a></li>
+              <li className="pt-2 mt-2 border-t border-slate-800/80">
+                <a 
+                  href="https://www.에어픽.kr/parking" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-[#FFD500] transition-colors text-slate-300 font-bold flex items-center gap-1 text-[13px]"
+                >
+                  에어픽 입점 · 요금 비교 · 예약 ↗
+                </a>
+              </li>
             </ul>
           </div>
 
