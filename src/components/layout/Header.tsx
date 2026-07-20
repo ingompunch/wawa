@@ -109,7 +109,7 @@ export const Header = () => {
                 <Phone size={24} /> {phone}
               </a>
               <p className="text-center text-slate-400 text-xs font-bold">
-                인천공항 1·2터미널 전직원 탁송보험 가입업체
+                인천공항 1·2터미널 전직원 발렛보험 가입업체
               </p>
             </div>
           </motion.div>
