@@ -323,7 +323,7 @@ export const Home = () => {
                             </div>
                             <div className="space-y-1 sm:space-y-3 text-left">
                                 <h4 className="text-lg sm:text-2xl font-black text-slate-900">종합 보험 가입</h4>
-                                <p className="text-slate-500 text-xs sm:text-base leading-relaxed font-semibold break-keep">탁송 중 사고 발생 시에도 걱정 마세요. 전직원 현대해상/삼성화재 발렛 전용 보험 가입 완료.</p>
+                                <p className="text-slate-500 text-xs sm:text-base leading-relaxed font-semibold break-keep">발렛 중 사고 발생 시에도 걱정 마세요. 전직원 현대해상/삼성화재 발렛 전용 보험 가입 완료.</p>
                             </div>
                         </div>
                     </div>
