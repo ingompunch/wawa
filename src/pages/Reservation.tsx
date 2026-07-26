@@ -15,6 +15,7 @@ import { motion } from 'motion/react';
 import { formatPrice, cn } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
+import { loadWawaBookingPolicy, validateReservationPolicy, BookingPolicy } from '../lib/bookingPolicy';
 
 // Firestore Error Info structure specified in the Firebase integration skill guidelines
 enum OperationType {
@@ -134,6 +135,16 @@ export const Reservation = () => {
       }
     };
     loadSharedResources();
+  }, []);
+
+  // Booking policy state (company open status, blocked dates, hourly cap)
+  const [bookingPolicy, setBookingPolicy] = useState<BookingPolicy | null>(null);
+
+  // Load booking policy on mount
+  useEffect(() => {
+    loadWawaBookingPolicy().then((policy) => {
+      setBookingPolicy(policy);
+    }).catch(console.error);
   }, []);
 
   // Terms Agreement states
@@ -515,6 +526,14 @@ export const Reservation = () => {
 
     try {
       setSubmitError(null);
+
+      // Validate reservation policy (company status, blocked dates, hourly capacity)
+      await validateReservationPolicy({
+        departureDate: finalPayload.departureDate,
+        arrivalDate: finalPayload.arrivalDate,
+        departureTime: finalPayload.departureTime,
+      });
+
       // Try anonymous authentication, but proceed anyway if it is not enabled in Firebase Console
       try {
         await signInAnonymously(auth);
@@ -632,6 +651,20 @@ export const Reservation = () => {
             인천공항 1·2터미널 실내/야외 합리적인 정직한 맞춤 요금을 실시간으로 연동하여 제공합니다.
           </p>
         </div>
+
+        {/* Closed / Blocked Notice Banner */}
+        {bookingPolicy && !bookingPolicy.isOpen && (
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-extrabold flex items-center gap-3">
+            <AlertCircle className="shrink-0 text-red-400" size={20} />
+            <span>현재 전체 온라인 예약이 접수 마감된 상태입니다. 문의는 고객센터(010-5353-4781)로 연락 부탁드립니다.</span>
+          </div>
+        )}
+        {bookingPolicy && bookingPolicy.isOpen && bookingPolicy.blockedDates.length > 0 && (
+          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-extrabold flex items-center gap-3">
+            <AlertCircle className="shrink-0 text-amber-400" size={20} />
+            <span>일부 날짜({bookingPolicy.blockedDates.join(', ')})는 예약이 마감되어 해당 날짜가 포함된 예약은 신청할 수 없습니다. (달력에 표시됨)</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-8 items-start">
           
@@ -763,6 +796,7 @@ export const Reservation = () => {
                       value={formData.entryDate}
                       onChange={(date) => setFormData({...formData, entryDate: date})}
                       theme="dark"
+                      disabledDates={bookingPolicy?.blockedDates || []}
                     />
                   </div>
                   
@@ -910,6 +944,7 @@ export const Reservation = () => {
                       value={formData.exitDate}
                       onChange={(date) => setFormData({...formData, exitDate: date})}
                       theme="dark"
+                      disabledDates={bookingPolicy?.blockedDates || []}
                     />
                   </div>
                   

@@ -8,6 +8,7 @@ interface DatePickerProps {
   placeholder?: string;
   className?: string;
   theme?: 'light' | 'dark';
+  disabledDates?: string[];
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -15,7 +16,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   placeholder = "연도-월-일",
   className = "",
-  theme = "light"
+  theme = "light",
+  disabledDates = []
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,8 +108,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     }
   };
 
-  const handleSelectDay = (dateStr: string, e: React.MouseEvent) => {
+  const handleSelectDay = (dateStr: string, isDisabled: boolean, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isDisabled) return;
     onChange(dateStr);
     setIsOpen(false);
   };
@@ -200,27 +203,34 @@ export const DatePicker: React.FC<DatePickerProps> = ({
               const isSelected = value === day.dateStr;
               const isToday = day.dateStr === new Date().toISOString().split('T')[0];
               const cellDayOfWeek = idx % 7;
+              const isDisabled = disabledDates.includes(day.dateStr);
 
               return (
                 <button
                   key={idx}
                   type="button"
-                  onClick={(e) => handleSelectDay(day.dateStr, e)}
+                  disabled={isDisabled}
+                  title={isDisabled ? "마감된 날짜입니다" : undefined}
+                  onClick={(e) => handleSelectDay(day.dateStr, isDisabled, e)}
                   className={`
-                    h-8 w-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all cursor-pointer
-                    ${!day.isCurrentMonth ? "text-slate-500/60 font-normal" : theme === 'dark' ? "text-slate-300" : "text-slate-700"}
-                    ${isSelected 
+                    h-8 w-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all relative
+                    ${isDisabled
+                      ? "bg-slate-100 text-slate-300 dark:bg-slate-800/40 dark:text-slate-600 line-through cursor-not-allowed"
+                      : "cursor-pointer"
+                    }
+                    ${!day.isCurrentMonth && !isDisabled ? "text-slate-500/60 font-normal" : theme === 'dark' && !isDisabled ? "text-slate-300" : !isDisabled ? "text-slate-700" : ""}
+                    ${isSelected && !isDisabled
                       ? "bg-[#FFD500] text-slate-900 font-bold shadow-sm animate-pulse-subtle" 
-                      : isToday 
+                      : isToday && !isDisabled
                         ? theme === 'dark' 
                           ? "border border-[#FFD500] text-[#FFD500] font-bold" 
                           : "border border-slate-900 text-slate-900 font-bold" 
-                        : theme === 'dark'
+                        : !isDisabled && (theme === 'dark'
                           ? "hover:bg-slate-800"
-                          : "hover:bg-slate-100"
+                          : "hover:bg-slate-100")
                     }
-                    ${day.isCurrentMonth && !isSelected && cellDayOfWeek === 0 ? "text-red-500" : ""}
-                    ${day.isCurrentMonth && !isSelected && cellDayOfWeek === 6 ? "text-blue-500" : ""}
+                    ${day.isCurrentMonth && !isSelected && !isDisabled && cellDayOfWeek === 0 ? "text-red-500" : ""}
+                    ${day.isCurrentMonth && !isSelected && !isDisabled && cellDayOfWeek === 6 ? "text-blue-500" : ""}
                   `}
                 >
                   {day.dayNum}

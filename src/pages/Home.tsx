@@ -17,15 +17,21 @@ import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
 import { TimePicker } from '../components/TimePicker';
 import { Link } from 'react-router-dom';
+import { loadWawaBookingPolicy, BookingPolicy } from '../lib/bookingPolicy';
 
 export const Home = () => {
     const { data: siteData, loading } = useSiteData();
+    const [bookingPolicy, setBookingPolicy] = useState<BookingPolicy | null>(null);
     const [entryDate, setEntryDate] = useState('');
     const [entryTime, setEntryTime] = useState('10:00');
     const [exitDate, setExitDate] = useState('');
     const [exitTime, setExitTime] = useState('10:00');
     const [parkingType, setParkingType] = useState<'outdoor' | 'indoor'>('indoor');
     const [totalPrice, setTotalPrice] = useState<number | null>(null);
+
+    useEffect(() => {
+        loadWawaBookingPolicy().then(setBookingPolicy).catch(console.error);
+    }, []);
 
     useEffect(() => {
         if (entryDate && exitDate && siteData) {
@@ -210,6 +216,7 @@ export const Home = () => {
                                             value={entryDate}
                                             onChange={setEntryDate}
                                             placeholder="연도-월-일"
+                                            disabledDates={bookingPolicy?.blockedDates || []}
                                         />
                                     </div>
                                     <div className="space-y-1.5 sm:space-y-2">
@@ -226,6 +233,7 @@ export const Home = () => {
                                             value={exitDate}
                                             onChange={setExitDate}
                                             placeholder="연도-월-일"
+                                            disabledDates={bookingPolicy?.blockedDates || []}
                                         />
                                     </div>
                                     <div className="space-y-1.5 sm:space-y-2">
