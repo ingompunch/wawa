@@ -233,7 +233,6 @@ export const Home = () => {
                                             value={exitDate}
                                             onChange={setExitDate}
                                             placeholder="연도-월-일"
-                                            disabledDates={bookingPolicy?.blockedDates || []}
                                         />
                                     </div>
                                     <div className="space-y-1.5 sm:space-y-2">

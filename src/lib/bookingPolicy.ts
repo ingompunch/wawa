@@ -7,8 +7,20 @@ export const COMPANY_ID = 'wawa';
 export interface BookingPolicy {
   isOpen: boolean;
   blockedDates: string[];
+  sameDayBookingBlocked: boolean;
   hourlyCapEnabled: boolean;
   maxCarsPerHour: number;
+}
+
+export function getKstToday(): string {
+  const now = new Date();
+  const kstFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return kstFormatter.format(now);
 }
 
 export function datesInRange(startYmd: string, endYmd: string): string[] {
@@ -44,6 +56,7 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy> {
       return {
         isOpen: true,
         blockedDates: [],
+        sameDayBookingBlocked: false,
         hourlyCapEnabled: false,
         maxCarsPerHour: 0,
       };
@@ -52,6 +65,7 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy> {
     return {
       isOpen: data.isOpen !== false,
       blockedDates: Array.isArray(data.blockedDates) ? data.blockedDates : [],
+      sameDayBookingBlocked: data.sameDayBookingBlocked === true,
       hourlyCapEnabled: data.hourlyCapEnabled === true,
       maxCarsPerHour: typeof data.maxCarsPerHour === 'number' ? data.maxCarsPerHour : 0,
     };
@@ -60,6 +74,7 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy> {
     return {
       isOpen: true,
       blockedDates: [],
+      sameDayBookingBlocked: false,
       hourlyCapEnabled: false,
       maxCarsPerHour: 0,
     };
@@ -113,11 +128,17 @@ export async function validateReservationPolicy(form: {
     throw new Error('현재 전체 예약이 마감된 상태입니다.');
   }
 
-  const span = datesInRange(form.departureDate, form.arrivalDate);
-  const blocked = span.filter((d) => policy.blockedDates.includes(d));
-  if (blocked.length > 0) {
-    throw new Error(`예약 일정에 마감된 날짜가 포함되어 있습니다: ${blocked.join(', ')}`);
+  // 1) 당일 입고 차단 검사
+  const todayKst = getKstToday();
+  if (policy.sameDayBookingBlocked && form.departureDate === todayKst) {
+    throw new Error('당일 입고 예약은 마감되었습니다.');
   }
 
+  // 2) 입고일 마감 검사 (입고일만 검사, 출고일은 상관없음)
+  if (policy.blockedDates.includes(form.departureDate)) {
+    throw new Error(`입고일(${form.departureDate})은 예약이 마감되었습니다.`);
+  }
+
+  // 3) 시간당 정원 마감 검사
   await assertHourlyCapacity(form.departureDate, form.departureTime, policy);
 }

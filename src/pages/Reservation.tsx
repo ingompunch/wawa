@@ -659,10 +659,16 @@ export const Reservation = () => {
             <span>현재 전체 온라인 예약이 접수 마감된 상태입니다. 문의는 고객센터(010-5353-4781)로 연락 부탁드립니다.</span>
           </div>
         )}
+        {bookingPolicy && bookingPolicy.isOpen && bookingPolicy.sameDayBookingBlocked && (
+          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-extrabold flex items-center gap-3">
+            <AlertCircle className="shrink-0 text-amber-400" size={20} />
+            <span>당일 입고 예약은 마감되었습니다. 익일부터 예약 가능합니다.</span>
+          </div>
+        )}
         {bookingPolicy && bookingPolicy.isOpen && bookingPolicy.blockedDates.length > 0 && (
           <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-extrabold flex items-center gap-3">
             <AlertCircle className="shrink-0 text-amber-400" size={20} />
-            <span>일부 날짜({bookingPolicy.blockedDates.join(', ')})는 예약이 마감되어 해당 날짜가 포함된 예약은 신청할 수 없습니다. (달력에 표시됨)</span>
+            <span>일부 날짜({bookingPolicy.blockedDates.join(', ')})는 입고일로 예약할 수 없습니다. (출고일은 선택 가능)</span>
           </div>
         )}
 
@@ -944,7 +950,6 @@ export const Reservation = () => {
                       value={formData.exitDate}
                       onChange={(date) => setFormData({...formData, exitDate: date})}
                       theme="dark"
-                      disabledDates={bookingPolicy?.blockedDates || []}
                     />
                   </div>
                   
