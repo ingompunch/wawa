@@ -43,7 +43,7 @@ export function datesInRange(startYmd: string, endYmd: string): string[] {
   return dates;
 }
 
-export async function loadWawaBookingPolicy(): Promise<BookingPolicy> {
+export async function loadWawaBookingPolicy(): Promise<BookingPolicy & { isError?: boolean }> {
   try {
     try {
       await signInAnonymously(auth);
@@ -77,6 +77,7 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy> {
       sameDayBookingBlocked: false,
       hourlyCapEnabled: false,
       maxCarsPerHour: 0,
+      isError: true,
     };
   }
 }
@@ -124,21 +125,30 @@ export async function validateReservationPolicy(form: {
   departureTime: string;
 }): Promise<void> {
   const policy = await loadWawaBookingPolicy();
-  if (!policy.isOpen) {
-    throw new Error('현재 전체 예약이 마감된 상태입니다.');
+
+  // 0) 정책 로드 통신 오류 시 안전 차단 (Fail-Closed)
+  if (policy.isError) {
+    throw new Error(
+      '예약 마감 상태를 확인하는 중 네트워크 통신 오류가 발생했습니다. 잠시 후 다시 시도하시거나 고객센터(010-5353-4781)로 문의해 주세요.'
+    );
   }
 
-  // 1) 당일 입고 차단 검사
+  // 1) 전체 예약 마감 검사
+  if (!policy.isOpen) {
+    throw new Error('현재 전체 온라인 예약 접수가 마감된 상태입니다. 문의는 고객센터(010-5353-4781)로 연락 부탁드립니다.');
+  }
+
+  // 2) 당일 입고 차단 검사
   const todayKst = getKstToday();
   if (policy.sameDayBookingBlocked && form.departureDate === todayKst) {
-    throw new Error('당일 입고 예약은 마감되었습니다.');
+    throw new Error(`선택하신 입고일(${form.departureDate})은 당일 예약이 마감되었습니다. 익일부터 예약 가능합니다.`);
   }
 
-  // 2) 입고일 마감 검사 (입고일만 검사, 출고일은 상관없음)
+  // 3) 입고일 마감 검사 (입고일만 검사, 출고일은 상관없음)
   if (policy.blockedDates.includes(form.departureDate)) {
-    throw new Error(`입고일(${form.departureDate})은 예약이 마감되었습니다.`);
+    throw new Error(`선택하신 입고일(${form.departureDate})은 마감되어 예약이 불가능합니다. 다른 날짜를 선택해 주세요.`);
   }
 
-  // 3) 시간당 정원 마감 검사
+  // 4) 시간당 정원 마감 검사
   await assertHourlyCapacity(form.departureDate, form.departureTime, policy);
 }
