@@ -15,7 +15,7 @@ import { motion } from 'motion/react';
 import { formatPrice, cn } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
-import { loadWawaBookingPolicy, validateReservationPolicy, BookingPolicy } from '../lib/bookingPolicy';
+import { loadWawaBookingPolicy, validateReservationPolicy, calculateFee, BookingPolicy } from '../lib/bookingPolicy';
 
 // Firestore Error Info structure specified in the Firebase integration skill guidelines
 enum OperationType {
@@ -280,56 +280,44 @@ export const Reservation = () => {
     formData.exitAmPm,
     formData.exitHour,
     formData.exitMin,
-    formData.parkingType
+    formData.parkingType,
+    formData.departureTerminal,
+    bookingPolicy,
   ]);
 
   const calculatePrice = () => {
-    const startParts = formData.entryDate.split('-').map(Number);
-    const endParts = formData.exitDate.split('-').map(Number);
-    
-    if (startParts.length !== 3 || endParts.length !== 3 || startParts.some(isNaN) || endParts.some(isNaN)) {
+    if (!formData.entryDate || !formData.exitDate) {
       setTotalPrice(null);
       setDaysCount(null);
       return;
     }
 
-    const d1 = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-    const d2 = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-    const diffTime = d2.getTime() - d1.getTime();
-    let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    if (diffDays < 1) diffDays = 1; // Minimum is 1 day
+    const entryHour24 = convertTo24Hour(formData.entryAmPm, formData.entryHour);
+    const entryTimeString = `${String(entryHour24).padStart(2, '0')}:${(formData.entryMin || '00').padStart(2, '0')}`;
 
-    // Rates calculation as per spec:
-    // 기본요금 40,000원은 입차일~출차일 포함 2일까지 커버, 3일째부터 가산.
-    // 야외: 3일째부터 하루당 +5,000원 누적 합산
-    // 실내: 3일째부터 하루당 +10,000원 누적 합산
-    let calculatedBaseFee = 40000;
-    if (diffDays > 2) {
-      const extraDays = diffDays - 2;
-      if (formData.parkingType === 'outdoor') {
-        calculatedBaseFee += extraDays * 5000;
-      } else {
-        calculatedBaseFee += extraDays * 10000;
-      }
+    const exitHour24 = convertTo24Hour(formData.exitAmPm, formData.exitHour);
+    const exitTimeString = `${String(exitHour24).padStart(2, '0')}:${(formData.exitMin || '00').padStart(2, '0')}`;
+
+    const res = calculateFee({
+      parkingType: formData.parkingType,
+      entryDate: formData.entryDate,
+      exitDate: formData.exitDate,
+      entryTime: entryTimeString,
+      exitTime: exitTimeString,
+      terminal: formData.departureTerminal,
+      policy: bookingPolicy?.pricePolicy,
+    });
+
+    if (res.diffDays <= 0) {
+      setTotalPrice(null);
+      setDaysCount(null);
+      return;
     }
 
-    // Checking entry / exit surcharges (야간 할증 10,000원 (19:00~05:00 입·출고 시))
-    const isEntrySurcharged = checkSurcharge(formData.entryAmPm, formData.entryHour, formData.entryMin);
-    const isExitSurcharged = checkSurcharge(formData.exitAmPm, formData.exitHour, formData.exitMin);
-
-    setEntrySurchargeApplied(isEntrySurcharged);
-    setExitSurchargeApplied(isExitSurcharged);
-
-    // 20,000 won added for each surcharge applied
-    if (isEntrySurcharged) {
-      calculatedBaseFee += 20000;
-    }
-    if (isExitSurcharged) {
-      calculatedBaseFee += 20000;
-    }
-
-    setDaysCount(diffDays);
-    setTotalPrice(calculatedBaseFee);
+    setDaysCount(res.diffDays);
+    setTotalPrice(res.totalPrice);
+    setEntrySurchargeApplied(res.isEntryNight);
+    setExitSurchargeApplied(res.isExitNight);
   };
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {

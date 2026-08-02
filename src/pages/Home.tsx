@@ -17,7 +17,7 @@ import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
 import { TimePicker } from '../components/TimePicker';
 import { Link } from 'react-router-dom';
-import { loadWawaBookingPolicy, BookingPolicy } from '../lib/bookingPolicy';
+import { loadWawaBookingPolicy, calculateFee, BookingPolicy } from '../lib/bookingPolicy';
 
 export const Home = () => {
     const { data: siteData, loading } = useSiteData();
@@ -34,10 +34,12 @@ export const Home = () => {
     }, []);
 
     useEffect(() => {
-        if (entryDate && exitDate && siteData) {
+        if (entryDate && exitDate) {
             calculate();
+        } else {
+            setTotalPrice(null);
         }
-    }, [entryDate, entryTime, exitDate, exitTime, parkingType, siteData]);
+    }, [entryDate, entryTime, exitDate, exitTime, parkingType, bookingPolicy]);
 
     const calculate = () => {
         if (!entryDate || !exitDate) {
@@ -45,61 +47,16 @@ export const Home = () => {
             return;
         }
 
-        const startParts = entryDate.split('-').map(Number);
-        const endParts = exitDate.split('-').map(Number);
-        
-        if (startParts.length !== 3 || endParts.length !== 3 || startParts.some(isNaN) || endParts.some(isNaN)) {
-            setTotalPrice(null);
-            return;
-        }
+        const res = calculateFee({
+            parkingType,
+            entryDate,
+            exitDate,
+            entryTime,
+            exitTime,
+            policy: bookingPolicy?.pricePolicy,
+        });
 
-        const entryParts = entryTime.split(':').map(Number);
-        const exitParts = exitTime.split(':').map(Number);
-        const entryHour = entryParts[0];
-        const entryMin = entryParts[1] || 0;
-        const exitHour = exitParts[0];
-        const exitMin = exitParts[1] || 0;
-
-        const d1 = new Date(startParts[0], startParts[1] - 1, startParts[2]);
-        const d2 = new Date(endParts[0], endParts[1] - 1, endParts[2]);
-        const diffTime = d2.getTime() - d1.getTime();
-        let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        if (diffDays < 1) diffDays = 1; // Minimum is 1 day
-        
-        if (siteData) {
-            // Rates calculation as per spec (wawavalet.com):
-            // 기본요금 40,000원은 입차일~출차일 포함 2일까지 커버, 3일째부터 가산.
-            // 야외: 3일째부터 하루당 +5,000원 누적 합산
-            // 실내: 3일째부터 하루당 +10,000원 누적 합산
-            let price = 40000;
-            if (diffDays > 2) {
-                const extraDays = diffDays - 2;
-                if (parkingType === 'outdoor') {
-                    price += extraDays * 5000;
-                } else {
-                    price += extraDays * 10000;
-                }
-            }
-
-            // 야간 할증 20,000원 (19:00~05:00 입·출고 시)
-            const checkSurchargeHour = (hour24: number, min: number) => {
-                return hour24 >= 19 || hour24 < 5;
-            };
-
-            const isEntrySurcharged = checkSurchargeHour(entryHour, entryMin);
-            const isExitSurcharged = checkSurchargeHour(exitHour, exitMin);
-
-            if (isEntrySurcharged) {
-                price += 20000;
-            }
-            if (isExitSurcharged) {
-                price += 20000;
-            }
-
-            setTotalPrice(price);
-        } else {
-            setTotalPrice(null);
-        }
+        setTotalPrice(res.totalPrice > 0 ? res.totalPrice : null);
     };
 
     if (loading || !siteData) return null;

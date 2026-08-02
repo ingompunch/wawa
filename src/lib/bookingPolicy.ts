@@ -4,13 +4,40 @@ import { db, auth } from './firebase';
 
 export const COMPANY_ID = 'wawa';
 
+export interface CompanyPricePolicy {
+  indoorBasePrice: number;
+  indoorBaseDays: number;
+  indoorExtraPrice: number;
+  outdoorBasePrice: number;
+  outdoorBaseDays: number;
+  outdoorExtraPrice: number;
+  surchargePrice: number;
+  surchargeStartTime: string; // e.g. "19:00"
+  surchargeEndTime: string;   // e.g. "05:00"
+  t2Surcharge?: number;
+}
+
 export interface BookingPolicy {
   isOpen: boolean;
   blockedDates: string[];
   sameDayBookingBlocked: boolean;
   hourlyCapEnabled: boolean;
   maxCarsPerHour: number;
+  pricePolicy: CompanyPricePolicy;
 }
+
+export const DEFAULT_PRICE_POLICY: CompanyPricePolicy = {
+  indoorBasePrice: 40000,
+  indoorBaseDays: 2,
+  indoorExtraPrice: 10000,
+  outdoorBasePrice: 40000,
+  outdoorBaseDays: 2,
+  outdoorExtraPrice: 5000,
+  surchargePrice: 20000,
+  surchargeStartTime: '19:00',
+  surchargeEndTime: '05:00',
+  t2Surcharge: 10000,
+};
 
 export function getKstToday(): string {
   const now = new Date();
@@ -59,15 +86,31 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy & { isError
         sameDayBookingBlocked: false,
         hourlyCapEnabled: false,
         maxCarsPerHour: 0,
+        pricePolicy: DEFAULT_PRICE_POLICY,
       };
     }
     const data = snap.data() || {};
+    
+    const pricePolicy: CompanyPricePolicy = {
+      indoorBasePrice: typeof data.indoorBasePrice === 'number' ? data.indoorBasePrice : DEFAULT_PRICE_POLICY.indoorBasePrice,
+      indoorBaseDays: typeof data.indoorBaseDays === 'number' ? data.indoorBaseDays : DEFAULT_PRICE_POLICY.indoorBaseDays,
+      indoorExtraPrice: typeof data.indoorExtraPrice === 'number' ? data.indoorExtraPrice : DEFAULT_PRICE_POLICY.indoorExtraPrice,
+      outdoorBasePrice: typeof data.outdoorBasePrice === 'number' ? data.outdoorBasePrice : DEFAULT_PRICE_POLICY.outdoorBasePrice,
+      outdoorBaseDays: typeof data.outdoorBaseDays === 'number' ? data.outdoorBaseDays : DEFAULT_PRICE_POLICY.outdoorBaseDays,
+      outdoorExtraPrice: typeof data.outdoorExtraPrice === 'number' ? data.outdoorExtraPrice : DEFAULT_PRICE_POLICY.outdoorExtraPrice,
+      surchargePrice: typeof data.surchargePrice === 'number' ? data.surchargePrice : (typeof data.surcharge === 'number' ? data.surcharge : DEFAULT_PRICE_POLICY.surchargePrice),
+      surchargeStartTime: typeof data.surchargeStartTime === 'string' ? data.surchargeStartTime : (typeof data.surchargeStart === 'string' ? data.surchargeStart : DEFAULT_PRICE_POLICY.surchargeStartTime),
+      surchargeEndTime: typeof data.surchargeEndTime === 'string' ? data.surchargeEndTime : (typeof data.surchargeEnd === 'string' ? data.surchargeEnd : DEFAULT_PRICE_POLICY.surchargeEndTime),
+      t2Surcharge: typeof data.t2Surcharge === 'number' ? data.t2Surcharge : DEFAULT_PRICE_POLICY.t2Surcharge,
+    };
+
     return {
       isOpen: data.isOpen !== false,
       blockedDates: Array.isArray(data.blockedDates) ? data.blockedDates : [],
       sameDayBookingBlocked: data.sameDayBookingBlocked === true,
       hourlyCapEnabled: data.hourlyCapEnabled === true,
       maxCarsPerHour: typeof data.maxCarsPerHour === 'number' ? data.maxCarsPerHour : 0,
+      pricePolicy,
     };
   } catch (error) {
     console.error('Failed to load booking policy:', error);
@@ -77,9 +120,114 @@ export async function loadWawaBookingPolicy(): Promise<BookingPolicy & { isError
       sameDayBookingBlocked: false,
       hourlyCapEnabled: false,
       maxCarsPerHour: 0,
+      pricePolicy: DEFAULT_PRICE_POLICY,
       isError: true,
     };
   }
+}
+
+function parseTimeToMinutes(timeStr: string): number | null {
+  if (!timeStr) return null;
+  const clean = timeStr.trim();
+  const parts = clean.split(':').map(Number);
+  if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+    return parts[0] * 60 + parts[1];
+  }
+  return null;
+}
+
+export function isNightTime(timeStr: string, startTime = '19:00', endTime = '05:00'): boolean {
+  const targetMin = parseTimeToMinutes(timeStr);
+  const startMin = parseTimeToMinutes(startTime);
+  const endMin = parseTimeToMinutes(endTime);
+
+  if (targetMin === null || startMin === null || endMin === null) return false;
+
+  if (startMin > endMin) {
+    // Overnight, e.g., 19:00 (1140m) to 05:00 (300m)
+    return targetMin >= startMin || targetMin < endMin;
+  } else {
+    // Same day, e.g., 22:00 to 24:00
+    return targetMin >= startMin && targetMin < endMin;
+  }
+}
+
+export function calculateFee(params: {
+  parkingType: 'indoor' | 'outdoor';
+  entryDate: string;
+  exitDate: string;
+  entryTime?: string; // HH:mm 24hr string
+  exitTime?: string;  // HH:mm 24hr string
+  terminal?: string;
+  policy?: CompanyPricePolicy;
+}): {
+  diffDays: number;
+  baseFee: number;
+  extraFee: number;
+  entrySurcharge: number;
+  exitSurcharge: number;
+  terminalSurcharge: number;
+  totalPrice: number;
+  isEntryNight: boolean;
+  isExitNight: boolean;
+} {
+  const p = params.policy || DEFAULT_PRICE_POLICY;
+
+  const startParts = params.entryDate.split('-').map(Number);
+  const endParts = params.exitDate.split('-').map(Number);
+
+  if (startParts.length !== 3 || endParts.length !== 3 || startParts.some(isNaN) || endParts.some(isNaN)) {
+    return {
+      diffDays: 0,
+      baseFee: 0,
+      extraFee: 0,
+      entrySurcharge: 0,
+      exitSurcharge: 0,
+      terminalSurcharge: 0,
+      totalPrice: 0,
+      isEntryNight: false,
+      isExitNight: false,
+    };
+  }
+
+  const d1 = new Date(startParts[0], startParts[1] - 1, startParts[2]);
+  const d2 = new Date(endParts[0], endParts[1] - 1, endParts[2]);
+  const diffTime = d2.getTime() - d1.getTime();
+  let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  if (diffDays < 1) diffDays = 1;
+
+  const isIndoor = params.parkingType === 'indoor';
+  const basePrice = isIndoor ? p.indoorBasePrice : p.outdoorBasePrice;
+  const baseDays = isIndoor ? p.indoorBaseDays : p.outdoorBaseDays;
+  const extraPrice = isIndoor ? p.indoorExtraPrice : p.outdoorExtraPrice;
+
+  const extraDays = Math.max(0, diffDays - baseDays);
+  const extraFee = extraDays * extraPrice;
+
+  const isEntryNight = params.entryTime ? isNightTime(params.entryTime, p.surchargeStartTime, p.surchargeEndTime) : false;
+  const isExitNight = params.exitTime ? isNightTime(params.exitTime, p.surchargeStartTime, p.surchargeEndTime) : false;
+
+  const entrySurcharge = isEntryNight ? p.surchargePrice : 0;
+  const exitSurcharge = isExitNight ? p.surchargePrice : 0;
+
+  let terminalSurcharge = 0;
+  if (params.terminal && (params.terminal.includes('T2') || params.terminal.includes('2')) && p.t2Surcharge) {
+    terminalSurcharge = p.t2Surcharge;
+  }
+
+  const totalPrice = basePrice + extraFee + entrySurcharge + exitSurcharge + terminalSurcharge;
+
+  return {
+    diffDays,
+    baseFee: basePrice,
+    extraFee,
+    entrySurcharge,
+    exitSurcharge,
+    terminalSurcharge,
+    totalPrice,
+    isEntryNight,
+    isExitNight,
+  };
 }
 
 function parseHour(time: string): number | null {
