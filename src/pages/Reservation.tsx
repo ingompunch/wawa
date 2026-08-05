@@ -281,7 +281,8 @@ export const Reservation = () => {
     formData.exitHour,
     formData.exitMin,
     formData.parkingType,
-    formData.departureTerminal,
+    formData.entryTerminal,
+    formData.exitTerminal,
     bookingPolicy,
   ]);
 
@@ -304,7 +305,8 @@ export const Reservation = () => {
       exitDate: formData.exitDate,
       entryTime: entryTimeString,
       exitTime: exitTimeString,
-      terminal: formData.departureTerminal,
+      departureTerminal: formData.entryTerminal,
+      arrivalTerminal: formData.exitTerminal,
       policy: bookingPolicy?.pricePolicy,
     });
 
@@ -318,6 +320,68 @@ export const Reservation = () => {
     setTotalPrice(res.totalPrice);
     setEntrySurchargeApplied(res.isEntryNight);
     setExitSurchargeApplied(res.isExitNight);
+  };
+
+  const [isSearchingFlight, setIsSearchingFlight] = useState(false);
+
+  const fetchIcnArrival = async (flightId: string, exitDateYmd: string) => {
+    if (!flightId || !exitDateYmd) return;
+    const cleanFlight = flightId.replace(/\s+/g, '').toUpperCase();
+    const dateStr = exitDateYmd.replace(/-/g, '');
+    if (!cleanFlight || dateStr.length !== 8) return;
+
+    setIsSearchingFlight(true);
+    try {
+      const res = await fetch(
+        `https://asia-northeast3-airpick-reservation.cloudfunctions.net/getIcnArrival?flightId=${cleanFlight}&date=${dateStr}`
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data) return;
+
+      const rawTime = String(data.estimatedTime || data.scheduleTime || data.arrivalTime || '').replace(/\D/g, '');
+      let hour = -1;
+      let min = -1;
+
+      if (rawTime.length === 4) {
+        hour = parseInt(rawTime.slice(0, 2), 10);
+        min = parseInt(rawTime.slice(2, 4), 10);
+      }
+
+      let ampm = '오전';
+      let hour12 = '12';
+      if (hour >= 0 && hour <= 23 && min >= 0 && min <= 59) {
+        if (hour >= 12) {
+          ampm = '오후';
+          hour12 = hour === 12 ? '12' : String(hour - 12);
+        } else {
+          ampm = '오전';
+          hour12 = hour === 0 ? '12' : String(hour);
+        }
+        const roundedMin = String(Math.floor(min / 10) * 10).padStart(2, '0');
+        const finalMin = MINUTES.includes(String(min).padStart(2, '0')) 
+          ? String(min).padStart(2, '0') 
+          : (MINUTES.includes(roundedMin) ? roundedMin : '00');
+
+        setFormData(prev => ({
+          ...prev,
+          exitAmPm: ampm,
+          exitHour: hour12,
+          exitMin: finalMin,
+        }));
+      }
+
+      const rawTerm = String(data.terminal || data.terminalId || '').toUpperCase();
+      if (rawTerm.includes('T2') || rawTerm.includes('2') || rawTerm.includes('P02')) {
+        setFormData(prev => ({ ...prev, exitTerminal: 'T2' }));
+      } else if (rawTerm.includes('T1') || rawTerm.includes('1') || rawTerm.includes('P01')) {
+        setFormData(prev => ({ ...prev, exitTerminal: 'T1' }));
+      }
+    } catch (err) {
+      console.warn('getIcnArrival lookup error:', err);
+    } finally {
+      setIsSearchingFlight(false);
+    }
   };
 
   const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -651,12 +715,6 @@ export const Reservation = () => {
           <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-extrabold flex items-center gap-3">
             <AlertCircle className="shrink-0 text-amber-400" size={20} />
             <span>당일 입고 예약은 마감되었습니다. 익일부터 예약 가능합니다.</span>
-          </div>
-        )}
-        {bookingPolicy && bookingPolicy.isOpen && bookingPolicy.blockedDates.length > 0 && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-extrabold flex items-center gap-3">
-            <AlertCircle className="shrink-0 text-amber-400" size={20} />
-            <span>일부 날짜({bookingPolicy.blockedDates.join(', ')})는 입고일로 예약할 수 없습니다. (출고일은 선택 가능)</span>
           </div>
         )}
 
@@ -1050,14 +1108,25 @@ export const Reservation = () => {
                     <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1 block">
                       입국 항공편명 <span className="text-red-500">*</span>
                     </label>
-                    <input 
-                      type="text"
-                      required
-                      placeholder="예) KE102"
-                      className="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3 placeholder:text-slate-500 focus:ring-1 focus:ring-[#FFD500] focus:border-[#FFD500] outline-none font-bold text-white text-sm transition-all"
-                      value={formData.exitFlight}
-                      onChange={(e) => setFormData({...formData, exitFlight: e.target.value})}
-                    />
+                    <div className="flex gap-2">
+                      <input 
+                        type="text"
+                        required
+                        placeholder="예) KE102"
+                        className="flex-1 bg-slate-950 border border-white/10 rounded-xl px-4 py-3 placeholder:text-slate-500 focus:ring-1 focus:ring-[#FFD500] focus:border-[#FFD500] outline-none font-bold text-white text-sm transition-all uppercase"
+                        value={formData.exitFlight}
+                        onChange={(e) => setFormData({...formData, exitFlight: e.target.value.toUpperCase()})}
+                        onBlur={() => fetchIcnArrival(formData.exitFlight, formData.exitDate)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fetchIcnArrival(formData.exitFlight, formData.exitDate)}
+                        disabled={isSearchingFlight}
+                        className="px-3 py-2 bg-[#FFD500]/10 hover:bg-[#FFD500]/20 text-[#FFD500] border border-[#FFD500]/30 rounded-xl text-xs font-bold transition-all whitespace-nowrap disabled:opacity-50"
+                      >
+                        {isSearchingFlight ? '조회중...' : '조회'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

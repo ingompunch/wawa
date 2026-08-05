@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { db, auth } from './firebase';
 
@@ -158,7 +158,9 @@ export function calculateFee(params: {
   exitDate: string;
   entryTime?: string; // HH:mm 24hr string
   exitTime?: string;  // HH:mm 24hr string
-  terminal?: string;
+  departureTerminal?: string;
+  arrivalTerminal?: string;
+  terminal?: string;  // legacy fallback parameter for departure terminal
   policy?: CompanyPricePolicy;
 }): {
   diffDays: number;
@@ -211,7 +213,13 @@ export function calculateFee(params: {
   const exitSurcharge = isExitNight ? p.surchargePrice : 0;
 
   let terminalSurcharge = 0;
-  if (params.terminal && (params.terminal.includes('T2') || params.terminal.includes('2')) && p.t2Surcharge) {
+  const depTerm = params.departureTerminal || params.terminal || '';
+  const arrTerm = params.arrivalTerminal || '';
+
+  const isDepT2 = depTerm.toUpperCase().includes('T2') || depTerm === '2';
+  const isArrT2 = arrTerm.toUpperCase().includes('T2') || arrTerm === '2';
+
+  if ((isDepT2 || isArrT2) && p.t2Surcharge) {
     terminalSurcharge = p.t2Surcharge;
   }
 
@@ -246,19 +254,28 @@ export async function assertHourlyCapacity(
   const hour = parseHour(departureTime);
   if (hour === null) throw new Error('입고 시각을 확인해 주세요.');
 
-  const snap = await getDocs(
-    query(
-      collection(db, 'reservations'),
-      where('companyId', '==', COMPANY_ID),
-      where('departureDate', '==', departureDate)
-    )
-  );
+  const prefixes = [COMPANY_ID, 'wawa_valet', '와와', '와와발렛'];
   let used = 0;
-  snap.forEach((d) => {
-    const row = d.data();
-    if (String(row.status || '') === 'cancelled' || row.status === '취소') return;
-    if (parseHour(row.departureTime) === hour) used += 1;
-  });
+
+  for (const prefix of prefixes) {
+    try {
+      const snap = await getDoc(doc(db, 'capacity', `${prefix}__${departureDate}`));
+      if (snap.exists()) {
+        const hoursObj = snap.data()?.hours;
+        if (hoursObj) {
+          const keyUnpadded = String(hour);
+          const keyPadded = keyUnpadded.padStart(2, '0');
+          const count = Number(hoursObj[keyUnpadded] ?? hoursObj[keyPadded] ?? 0);
+          if (Number.isFinite(count)) {
+            used += count;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(`Failed to read capacity doc for ${prefix}__${departureDate}:`, e);
+    }
+  }
+
   if (used >= policy.maxCarsPerHour) {
     const hh = String(hour).padStart(2, '0');
     throw new Error(
