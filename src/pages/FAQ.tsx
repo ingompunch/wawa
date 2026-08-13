@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { ChevronDown, HelpCircle, Phone } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, trackPhoneCallConversion } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
 
 export const FAQ = () => {
@@ -61,7 +61,7 @@ export const FAQ = () => {
                     <div className="mt-16 bg-slate-900 p-12 rounded-[3.5rem] text-center text-white space-y-6">
                         <h4 className="text-2xl font-black">찾으시는 답변이 없나요?</h4>
                         <p className="text-slate-400 font-medium">상담원이 24시간 실시간으로 답변해 드립니다.</p>
-                        <a href={`tel:${phone}`} className="inline-flex items-center gap-3 bg-[#FFD500] text-slate-900 px-10 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-xl shadow-yellow-500/20">
+                        <a href={`tel:${phone}`} onClick={trackPhoneCallConversion} className="inline-flex items-center gap-3 bg-[#FFD500] text-slate-900 px-10 py-4 rounded-2xl font-black text-lg hover:scale-105 transition-all shadow-xl shadow-yellow-500/20">
                             <Phone size={24} /> {phone} 상담하기
                         </a>
                     </div>

@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { formatPrice, cn } from '../lib/utils';
+import { formatPrice, cn, trackPhoneCallConversion } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
 import { loadWawaBookingPolicy, validateReservationPolicy, calculateFee, BookingPolicy } from '../lib/bookingPolicy';
@@ -598,7 +598,7 @@ export const Reservation = () => {
       try {
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('event', 'conversion', {
-            'send_to': 'AW-18276370959/여기에_구글에서_받은_라벨을_넣으세요'
+            'send_to': 'AW-18276546315/EzKPCMud6uAcEIvu94pE'
           });
         }
       } catch (gtagErr) {
@@ -708,7 +708,7 @@ export const Reservation = () => {
         {bookingPolicy && !bookingPolicy.isOpen && (
           <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-extrabold flex items-center gap-3">
             <AlertCircle className="shrink-0 text-red-400" size={20} />
-            <span>현재 전체 온라인 예약이 접수 마감된 상태입니다. 문의는 고객센터(010-5353-4781)로 연락 부탁드립니다.</span>
+            <span>현재 전체 온라인 예약이 접수 마감된 상태입니다. 문의는 고객센터(<a href="tel:010-5353-4781" onClick={trackPhoneCallConversion} className="underline hover:text-amber-300">010-5353-4781</a>)로 연락 부탁드립니다.</span>
           </div>
         )}
         {bookingPolicy && bookingPolicy.isOpen && bookingPolicy.sameDayBookingBlocked && (

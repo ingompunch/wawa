@@ -11,3 +11,15 @@ export function formatPrice(price: number) {
     currency: 'KRW',
   }).format(price).replace('₩', '') + '원';
 }
+
+export function trackPhoneCallConversion() {
+  try {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'conversion', {
+        'send_to': 'AW-18276546315/tX6sCM6d6uAcEIvu94pE'
+      });
+    }
+  } catch (err) {
+    console.warn('gtag phone call conversion error:', err);
+  }
+}

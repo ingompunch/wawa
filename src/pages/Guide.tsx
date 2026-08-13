@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from '../components/layout/Layout';
 import { Phone, CheckCircle2, ChevronRight, Car, Key, MapPin } from 'lucide-react';
 import { useSiteData } from '../lib/siteService';
+import { trackPhoneCallConversion } from '../lib/utils';
 import departureImg from '../assets/images/airport_departure_1784129768111.jpg';
 import arrivalImg from '../assets/images/airport_arrival_1784129786095.jpg';
 
@@ -103,7 +104,7 @@ export const Guide = () => {
                             <p className="text-slate-800 font-bold opacity-70">24시간 언제든 친절하게 상담해 드립니다.</p>
                         </div>
                         <div className="flex flex-wrap justify-center gap-4">
-                             <a href={`tel:${phone}`} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:scale-105 transition-all">
+                             <a href={`tel:${phone}`} onClick={trackPhoneCallConversion} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:scale-105 transition-all">
                                 <Phone size={20} /> 실시간 전화 상담
                             </a>
                             <a href={reservationLink} className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black flex items-center gap-2 hover:scale-105 transition-all">

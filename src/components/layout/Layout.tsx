@@ -3,6 +3,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { Phone } from 'lucide-react';
 import { motion } from 'motion/react';
+import { trackPhoneCallConversion } from '../../lib/utils';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         <motion.a 
           href="tel:010-5353-4781"
+          onClick={trackPhoneCallConversion}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="bg-slate-900 text-[#FFD500] p-4 rounded-full shadow-2xl shadow-slate-400 flex items-center justify-center group"

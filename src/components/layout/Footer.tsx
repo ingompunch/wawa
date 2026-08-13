@@ -1,5 +1,6 @@
 import React from 'react';
 import { Car, MapPin, Phone, ShieldCheck } from 'lucide-react';
+import { trackPhoneCallConversion } from '../../lib/utils';
 
 export const Footer = () => {
   return (
@@ -16,7 +17,7 @@ export const Footer = () => {
             <div className="space-y-2 text-sm leading-relaxed">
               <p>상호: 와와 주차대행 | 대표: 김성근 | 사업자번호: 893-21-02268</p>
               <p>주소: 인천시 중구 운서동 3093-7</p>
-              <p>고객센터: <span className="text-white font-bold text-lg">010-5353-4781</span> (365일 24시간 상담가능)</p>
+              <p>고객센터: <a href="tel:010-5353-4781" onClick={trackPhoneCallConversion} className="text-white font-bold text-lg hover:text-[#FFD500] transition-colors">010-5353-4781</a> (365일 24시간 상담가능)</p>
               <p>발렛보험: 전직원 삼성화재/현대해상 보험 가입 완료</p>
             </div>
           </div>

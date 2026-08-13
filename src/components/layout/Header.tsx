@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Phone, Menu, X, Car } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, trackPhoneCallConversion } from '../../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSiteData } from '../../lib/siteService';
 
@@ -64,6 +64,7 @@ export const Header = () => {
           })}
           <a
             href={`tel:${phone}`}
+            onClick={trackPhoneCallConversion}
             className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-black hover:bg-[#FFD500] hover:text-slate-900 transition-all shadow-lg shadow-slate-200"
           >
             <Phone size={16} /> {phone}
@@ -104,6 +105,7 @@ export const Header = () => {
             <div className="mt-auto space-y-4">
               <a
                 href={`tel:${phone}`}
+                onClick={trackPhoneCallConversion}
                 className="flex items-center justify-center gap-3 bg-[#FFD500] text-slate-900 py-4 rounded-2xl font-black text-lg shadow-xl shadow-yellow-100"
               >
                 <Phone size={24} /> {phone}

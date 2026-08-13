@@ -12,7 +12,7 @@ import {
   Video,
   Phone
 } from 'lucide-react';
-import { cn, formatPrice } from '../lib/utils';
+import { cn, formatPrice, trackPhoneCallConversion } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
 import { DatePicker } from '../components/DatePicker';
 import { TimePicker } from '../components/TimePicker';
@@ -305,7 +305,11 @@ export const Home = () => {
                             {siteData.home.bannerSub}
                         </p>
                         <div className="pt-2 sm:pt-4">
-                            <a href={`tel:${siteData.phone || '010-5353-4781'}`} className="bg-slate-900 text-white px-6 sm:px-10 py-3.5 sm:py-5 rounded-2xl font-black text-sm sm:text-xl shadow-2xl shadow-yellow-600/40 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 sm:gap-3">
+                            <a 
+                                href={`tel:${siteData.phone || '010-5353-4781'}`} 
+                                onClick={trackPhoneCallConversion}
+                                className="bg-slate-900 text-white px-6 sm:px-10 py-3.5 sm:py-5 rounded-2xl font-black text-sm sm:text-xl shadow-2xl shadow-yellow-600/40 hover:scale-105 active:scale-95 transition-all inline-flex items-center gap-2 sm:gap-3"
+                            >
                                 <Phone size={16} className="sm:size-6" /> 24시간 즉시 상담 전화
                             </a>
                         </div>
