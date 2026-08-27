@@ -8,6 +8,7 @@ import { Intro } from './pages/Intro';
 import { Guide } from './pages/Guide';
 import { Fees } from './pages/Fees';
 import { FAQ } from './pages/FAQ';
+import { Card } from './pages/Card';
 
 export default function App() {
   const basename = window.location.hostname.includes('github.io') ? '/wawavalet.com' : '/';
@@ -20,6 +21,8 @@ export default function App() {
         <Route path="/fees" element={<Fees />} />
         <Route path="/reservation" element={<Layout><Reservation /></Layout>} />
         <Route path="/faq" element={<FAQ />} />
+        <Route path="/card" element={<Card />} />
+        <Route path="/card/" element={<Card />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
