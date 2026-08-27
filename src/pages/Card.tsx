@@ -1,25 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Phone, MapPin, Globe, ShieldCheck } from 'lucide-react';
-import QRCode from 'qrcode';
 
-const AIRPICK_LOGO_DATA_URI = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTUwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE1MCI+CiAgPCEtLSBTdWl0Y2FzZSBUb3AgSGFuZGxlIC0tPgogIDxwYXRoIGQ9Ik0gNDggMjAgQyA0OCAxMy41IDUzLjUgOCA2MCA4IEMgNjYuNSA4IDcyIDEzLjUgNzIgMjAgTCA3MiAyNiBMIDQ4IDI2IFoiIGZpbGw9IiNlYTVhMWUiLz4KICA8cGF0aCBkPSJNIDU0IDIwIEMgNTQgMTYuNSA1Ni41IDE0IDYwIDE0IEMgNjMuNSAxNCA2NiAxNi41IDY2IDIwIEwgNjYgMjYgTCA1NCAyNiBaIiBmaWxsPSIjZmZmZmZmIi8+CgogIDwhLS0gQm90dG9tIFdoZWVscyAtLT4KICA8Y2lyY2xlIGN4PSI0MiIgY3k9IjEyNCIgcj0iNS41IiBmaWxsPSIjZWE1YTFlIi8+CiAgPGNpcmNsZSBjeD0iODQiIGN5PSIxMjQiIHI9IjUuNSIgZmlsbD0iI2VhNWExZSIvPgoKICA8IS0tIExlZnQgQm90dG9tIDNEIENvbnRvdXIgQnVtcCAtLT4KICA8cGF0aCBkPSJNIDMyIDg0IEMgMjMgOTIgMjIgMTEwIDM3IDExOSBMIDMzIDExOSBDIDIxIDExMCAyMSA5MiAzMSA4NCBaIiBmaWxsPSIjZWE1YTFlIi8+CiAgPHBhdGggZD0iTSAzMSA4NiBDIDIyIDk0IDIyIDExMSAzNiAxMTkgQyAyNSAxMTYgMjMgOTcgMzEgODYgWiIgZmlsbD0iI2VhNWExZSIvPgoKICA8IS0tIE1haW4gU3VpdGNhc2UgQm9keSAtLT4KICA8cmVjdCB4PSIyNyIgeT0iMjQiIHdpZHRoPSI3MiIgaGVpZ2h0PSI5NiIgcng9IjE5IiBmaWxsPSIjZWE1YTFlIi8+CiAgPCEtLSBXaGl0ZSBDdXJ2ZWQgTW90aW9uIFRyYWlsIC8gU3dvb3NoIC0tPgogIDxwYXRoIGQ9Ik0gMjkgMTE1IEMgMjYgOTUgNDAgNjggNzAgNTggQyA1NiA2NCAzOCA4OCAzNyAxMTYgQyAzNCAxMTcgMzEgMTE3IDI5IDExNSBaIiBmaWxsPSIjZmZmZmZmIi8+CiAgPCEtLSBXaGl0ZSBBaXJwbGFuZSAoRmx5aW5nIHVwd2FyZHMtcmlnaHQg4oaXKSAtLT4KICA8cGF0aCBkPSJNIDg5IDUxIEMgODcgNDkuNSA4MiA1Mi41IDc3IDU1IEwgNjYgNDUgQyA2Mi41IDQyIDYwIDQ0IDYyLjUgNDYuNSBMIDcwIDU3LjUgTCA1OS41IDYzIEwgNTMuNSA1OC41IEMgNTEuNSA1NyA1MC41IDU4LjUgNTIgNjAuNSBMIDU2IDY3IEwgNTIuNSA2OSBDIDUwLjUgNzAuNSA1MS41IDcyLjUgNTQgNzIgTCA2MiA2OC41IEwgNzIuNSA3OSBDIDc1IDgxLjUgNzcgODAgNzUuNSA3Ni41IEwgNzQgNjYuNSBMIDg1IDU5LjUgQyA4OSA1Ni41IDkwLjUgNTIuNSA4OSA1MSBaIiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMC42IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPg==";
+const AIRPICK_LOGO_GREEN_DATA_URI = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTUwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjE1MCI+CiAgPCEtLSBTdWl0Y2FzZSBUb3AgSGFuZGxlIC0tPgogIDxwYXRoIGQ9Ik0gNDggMjAgQyA0OCAxMy41IDUzLjUgOCA2MCA4IEMgNjYuNSA4IDcyIDEzLjUgNzIgMjAgTCA3MiAyNiBMIDQ4IDI2IFoiIGZpbGw9IiMyZDRhM2UiLz4KICA8cGF0aCBkPSJNIDU0IDIwIEMgNTQgMTYuNSA1Ni41IDE0IDYwIDE0IEMgNjMuNSAxNCA2NiAxNi41IDY2IDIwIEwgNjYgMjYgTCA1NCAyNiBaIiBmaWxsPSIjZmJmNWViIi8+CgogIDwhLS0gQm90dG9tIFdoZWVscyAtLT4KICA8Y2lyY2xlIGN4PSI0MiIgY3k9IjEyNCIgcj0iNS41IiBmaWxsPSIjMmQ0YTNlIi8+CiAgPGNpcmNsZSBjeD0iODQiIGN5PSIxMjQiIHI9IjUuNSIgZmlsbD0iIzJkNGEzZSIvPgoKICA8IS0tIExlZnQgQm90dG9tIDNEIENvbnRvdXIgQnVtcCAtLT4KICA8cGF0aCBkPSJNIDMyIDg0IEMgMjMgOTIgMjIgMTEwIDM3IDExOSBMIDMzIDExOSBDIDIxIDExMCAyMSA5MiAzMSA4NCBaIiBmaWxsPSIjMmQ0YTNlIi8+CiAgPHBhdGggZD0iTSAzMSA4NiBDIDIyIDk0IDIyIDExMSAzNiAxMTkgQyAyNSAxMTYgMjMgOTcgMzEgODYgWiIgZmlsbD0iIzJkNGEzZSIvPgoKICA8IS0tIE1haW4gU3VpdGNhc2UgQm9keSAtLT4KICA8cmVjdCB4PSIyNyIgeT0iMjQiIHdpZHRoPSI3MiIgaGVpZ2h0PSI5NiIgcng9IjE5IiBmaWxsPSIjMmQ0YTNlIi8+CiAgPCEtLSBDdXJ2ZWQgTW90aW9uIFRyYWlsIC8gU3dvb3NoIC0tPgogIDxwYXRoIGQ9Ik0gMjkgMTE1IEMgMjYgOTUgNDAgNjggNzAgNTggQyA1NiA2NCAzOCA4OCAzNyAxMTYgQyAzNCAxMTcgMzEgMTE3IDI5IDExNSBaIiBmaWxsPSIjZmJmNWViIi8+CiAgPCEtLSBBaXJwbGFuZSAoRmx5aW5nIHVwd2FyZHMtcmlnaHQg4oaXKSAtLT4KICA8cGF0aCBkPSJNIDg5IDUxIEMgODcgNDkuNSA4MiA1Mi41IDc3IDU1IEwgNjYgNDUgQyA2Mi41IDQyIDYwIDQ0IDYyLjUgNDYuNSBMIDcwIDU3LjUgTCA1OS41IDYzIEwgNTMuNSA1OC41IEMgNTEuNSA1NyA1MC41IDU4LjUgNTIgNjAuNSBMIDU2IDY3IEwgNTIuNSA2OSBDIDUwLjUgNzAuNSA1MS41IDcyLjUgNTQgNzIgTCA2MiA2OC41IEwgNzIuNSA3OSBDIDc1IDgxLjUgNzcgODAgNzUuNSA3Ni41IEwgNzQgNjYuNSBMIDg1IDU5LjUgQyA4OSA1Ni41IDkwLjUgNTIuNSA4OSA1MSBaIiBmaWxsPSIjZmJmNWViIiBzdHJva2U9IiNmYmY1ZWIiIHN0cm9rZS13aWR0aD0iMC42IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPg==";
 
 export const Card: React.FC = () => {
-  const homepageUrl = "www.wawavalet.com";
   const reservationQrUrl = "https://airpick-reservation.web.app/h/wawa?src=business_card";
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
   useEffect(() => {
     document.title = "와와주차대행 | 명함";
-    QRCode.toDataURL(reservationQrUrl, {
-      margin: 1,
-      width: 400,
-      color: {
-        dark: '#2d4a3e',
-        light: '#ffffff'
-      },
-      errorCorrectionLevel: 'M'
-    }).then(setQrDataUrl);
   }, []);
 
   return (
@@ -47,15 +35,15 @@ export const Card: React.FC = () => {
             </h1>
           </div>
 
-          {/* Airpick Official Partner Emblem */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f5ede0]/90 border border-[#dfd2c0] rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          {/* Airpick Official Partner Emblem (Option A - Refined Tone-on-Tone) */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f1e9dc]/80 border border-[#d8cbba] rounded-full">
             <img 
-              src={AIRPICK_LOGO_DATA_URI} 
+              src={AIRPICK_LOGO_GREEN_DATA_URI} 
               alt="에어픽 로고" 
               className="w-3.5 h-3.5 object-contain"
             />
-            <span className="text-[11px] font-bold text-[#3e5348]">
-              에어픽 <strong className="text-[#ea5a1e] font-extrabold">공식 파트너</strong>
+            <span className="text-[11px] font-bold text-[#2d4a3e] tracking-tight">
+              에어픽 <span className="font-extrabold text-[#2d4a3e]">공식 파트너</span>
             </span>
           </div>
         </div>
@@ -122,15 +110,16 @@ export const Card: React.FC = () => {
               title="실시간 예약 바로가기"
               className="block p-1 bg-white border border-[#dfd2c0] rounded shadow-sm hover:border-[#2d4a3e] transition-all group"
             >
-              {qrDataUrl ? (
-                <img 
-                  src={qrDataUrl} 
-                  alt="와와주차대행 실시간 예약 QR" 
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain group-hover:scale-102 transition-transform"
-                />
-              ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#ede3d1] animate-pulse rounded" />
-              )}
+              {/* Crisp Vector QR Code SVG (Never breaks) */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 35 35" 
+                shapeRendering="crispEdges"
+                className="w-16 h-16 sm:w-20 sm:h-20 group-hover:scale-102 transition-transform"
+              >
+                <path fill="#ffffff" d="M0 0h35v35H0z"/>
+                <path stroke="#2d4a3e" d="M1 1.5h7m2 0h5m2 0h1m2 0h3m1 0h1m2 0h7M1 2.5h1m5 0h1m2 0h3m1 0h4m9 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h1m2 0h3m2 0h1m2 0h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h2m1 0h1m4 0h2m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m3 0h3m1 0h1m2 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h3m3 0h2m1 0h1m8 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h1m1 0h3m1 0h3m1 0h7M1 9.5h1m1 0h5m4 0h1m1 0h5m1 0h2m1 0h1m1 0h1m1 0h5M1 10.5h2m1 0h3m1 0h2m2 0h2m3 0h1m1 0h4m1 0h1m2 0h2m1 0h4M1 11.5h7m3 0h2m3 0h1m1 0h2m1 0h1m3 0h2m2 0h1m1 0h2M1 12.5h2m1 0h3m1 0h4m1 0h1m1 0h1m1 0h1m3 0h3m1 0h3m1 0h4M1 13.5h2m1 0h2m1 0h1m2 0h1m1 0h2m4 0h1m7 0h1m2 0h2M3 14.5h4m1 0h1m4 0h1m1 0h1m1 0h1m2 0h2m1 0h2m2 0h1m3 0h3M2 15.5h1m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2m2 0h1m1 0h1m4 0h2m1 0h1m1 0h2M1 16.5h1m3 0h1m2 0h3m2 0h1m8 0h3m1 0h2m1 0h3M1 17.5h2m4 0h2m1 0h2m2 0h3m1 0h1m1 0h1m3 0h1m1 0h1m1 0h3m2 0h1M1 18.5h2m2 0h2m1 0h1m1 0h2m1 0h1m1 0h1m4 0h2m2 0h1m2 0h2m1 0h2m1 0h1M1 19.5h2m4 0h2m2 0h1m4 0h1m1 0h2m1 0h3m1 0h1m2 0h2m1 0h2M2 20.5h1m3 0h1m1 0h1m1 0h1m1 0h3m2 0h1m2 0h1m1 0h5m1 0h4m1 0h1M2 21.5h2m2 0h3m1 0h1m2 0h1m3 0h1m5 0h1m2 0h1m1 0h3m1 0h2M1 22.5h1m1 0h4m1 0h6m3 0h1m2 0h2m2 0h5m2 0h1m1 0h1M1 23.5h1m3 0h1m1 0h1m1 0h4m2 0h3m3 0h3m4 0h1m2 0h2M1 24.5h1m1 0h1m1 0h1m7 0h1m1 0h2m2 0h2m1 0h2m1 0h2m1 0h2m1 0h1M1 25.5h1m1 0h3m1 0h3m2 0h2m1 0h2m1 0h1m2 0h1m1 0h1m1 0h5m2 0h2M9 26.5h2m1 0h2m3 0h9m3 0h1m1 0h1m1 0h1M1 27.5h7m5 0h6m2 0h1m2 0h2m1 0h1m1 0h1m1 0h1M1 28.5h1m5 0h1m1 0h1m1 0h2m4 0h1m3 0h2m1 0h2m3 0h3m1 0h1M1 29.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h6M1 30.5h1m1 0h3m1 0h1m1 0h1m4 0h2m1 0h10m2 0h2m1 0h2M1 31.5h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h3m1 0h1m1 0h1m5 0h2m1 0h1M1 32.5h1m5 0h1m3 0h2m1 0h1m6 0h2m3 0h1m2 0h3M1 33.5h7m1 0h2m3 0h1m1 0h1m1 0h1m4 0h6m3 0h1"/>
+              </svg>
             </a>
             <span className="text-[10px] font-bold text-[#5a776b] mt-1 tracking-tight">
               실시간 예약 QR
