@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" width="120" height="150">
+  <!-- Suitcase Top Handle -->
+  <path d="M 48 20 C 48 13.5 53.5 8 60 8 C 66.5 8 72 13.5 72 20 L 72 26 L 48 26 Z" fill="#ea5a1e"/>
+  <path d="M 54 20 C 54 16.5 56.5 14 60 14 C 63.5 14 66 16.5 66 20 L 66 26 L 54 26 Z" fill="#ffffff"/>
+
+  <!-- Bottom Wheels -->
+  <circle cx="42" cy="124" r="5.5" fill="#ea5a1e"/>
+  <circle cx="84" cy="124" r="5.5" fill="#ea5a1e"/>
+
+  <!-- Left Bottom 3D Contour Bump -->
+  <path d="M 32 84 C 23 92 22 110 37 119 L 33 119 C 21 110 21 92 31 84 Z" fill="#ea5a1e"/>
+  <path d="M 31 86 C 22 94 22 111 36 119 C 25 116 23 97 31 86 Z" fill="#ea5a1e"/>
+
+  <!-- Main Suitcase Body -->
+  <rect x="27" y="24" width="72" height="96" rx="19" fill="#ea5a1e"/>
+
+  <!-- White Curved Motion Trail / Swoosh -->
+  <path d="M 29 115 C 26 95 40 68 70 58 C 56 64 38 88 37 116 C 34 117 31 117 29 115 Z" fill="#ffffff"/>
+
+  <!-- White Airplane (Flying upwards-right ↗) -->
+  <path d="M 89 51 
+           C 87 49.5 82 52.5 77 55 
+           L 66 45 
+           C 62.5 42 60 44 62.5 46.5 
+           L 70 57.5 
+           L 59.5 63 
+           L 53.5 58.5 
+           C 51.5 57 50.5 58.5 52 60.5 
+           L 56 67 
+           L 52.5 69 
+           C 50.5 70.5 51.5 72.5 54 72 
+           L 62 68.5 
+           L 72.5 79 
+           C 75 81.5 77 80 75.5 76.5 
+           L 74 66.5 
+           L 85 59.5 
+           C 89 56.5 90.5 52.5 89 51 Z" 
+        fill="#ffffff" stroke="#ffffff" stroke-width="0.6" stroke-linejoin="round"/>
+</svg>

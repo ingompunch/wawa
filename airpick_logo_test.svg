@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" width="200" height="240">
+  <defs>
+    <!-- Shadow or clean vector -->
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <!-- Top Handle -->
+    <path d="M82 32 C82 23 89 16 98 16 L102 16 C111 16 118 23 118 32 L118 42 L82 42 Z" fill="#e85a1e"/>
+    <path d="M92 34 C92 28 95 24 100 24 C105 24 108 28 108 34 L108 42 L92 42 Z" fill="#ffffff"/>
+
+    <!-- Wheels -->
+    <circle cx="72" cy="208" r="10" fill="#e85a1e"/>
+    <circle cx="138" cy="208" r="10" fill="#e85a1e"/>
+
+    <!-- Main Suitcase Body -->
+    <!-- Left shadow/side bump -->
+    <path d="M52 140 C42 148 40 174 64 186 L56 186 C40 186 36 160 48 142 Z" fill="#e85a1e"/>
+
+    <!-- Main Luggage Box -->
+    <rect x="48" y="38" width="112" height="154" rx="28" fill="#e85a1e"/>
+
+    <!-- Left 3D Accent Curve -->
+    <path d="M58 136 C44 148 42 176 66 188 C54 184 48 162 58 136 Z" fill="#e85a1e"/>
+
+    <!-- White Swoosh and Airplane -->
+    <!-- Swoosh Trail -->
+    <path d="M50 184 C48 152 70 112 114 96 C104 106 72 136 70 184 Z" fill="#ffffff"/>
+
+    <!-- Airplane -->
+    <!-- Center fuselage & Wings -->
+    <path d="M146 80 L118 90 L98 70 L93 74 L108 93 L92 98 L85 93 L81 96 L89 104 L87 109 L94 107 L102 118 L107 116 L104 106 L124 99 L132 124 L138 122 L131 96 L146 89 C150 87 151 83 149 81 C148 80 147 80 146 80 Z" fill="#ffffff"/>
+  </g>
+</svg>
