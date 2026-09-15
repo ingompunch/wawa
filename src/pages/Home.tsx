@@ -10,7 +10,8 @@ import {
   Star,
   Award,
   Video,
-  Phone
+  Phone,
+  ExternalLink
 } from 'lucide-react';
 import { cn, formatPrice, trackPhoneCallConversion } from '../lib/utils';
 import { useSiteData } from '../lib/siteService';
@@ -289,6 +290,50 @@ export const Home = () => {
                                 <h4 className="text-lg sm:text-2xl font-black text-slate-900">종합 보험 가입</h4>
                                 <p className="text-slate-500 text-xs sm:text-base leading-relaxed font-semibold break-keep">발렛 중 사고 발생 시에도 걱정 마세요. 전직원 현대해상/삼성화재 발렛 전용 보험 가입 완료.</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Airpick x Usimsa Partnership Banner */}
+            <section className="px-4 sm:px-8 mb-12 sm:mb-24">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="relative overflow-hidden rounded-[1.8rem] sm:rounded-[2.8rem] bg-[#141b2a] border border-[#232f48] shadow-2xl p-6 sm:p-12 md:p-14 text-left transition-all">
+                        {/* Decorative Wireframe Graphic (Phone / Luggage Contour) */}
+                        <div className="absolute right-6 sm:right-16 bottom-16 sm:bottom-20 w-28 sm:w-36 h-36 sm:h-48 border-2 border-slate-700/30 rounded-[1.8rem] pointer-events-none -rotate-6 hidden xs:block">
+                            <div className="w-10 h-1 bg-slate-700/30 rounded-full mx-auto mt-3" />
+                        </div>
+                        <div className="absolute -top-24 -right-24 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                        <div className="relative z-10 space-y-3 sm:space-y-4 max-w-3xl">
+                            {/* Top Tag */}
+                            <div className="inline-flex items-center gap-1.5 bg-[#20293a] border border-[#303d54] text-[#e0bd74] text-[11px] sm:text-xs font-black px-3.5 py-1.5 rounded-full tracking-tight">
+                                에어픽 제휴 · 30% 할인 · 9.15 ~ 10.15
+                            </div>
+
+                            {/* Headline */}
+                            <h3 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-snug break-keep">
+                                유심사 <span className="text-[#FFD500]">30% 할인</span>으로<br />
+                                해외 데이터를 준비하세요
+                            </h3>
+
+                            {/* Subtitle */}
+                            <p className="text-slate-400 text-xs sm:text-sm md:text-base font-medium pb-2 sm:pb-4">
+                                에어픽 × 유심사 전용 할인 · 구매·개통은 유심사에서
+                            </p>
+                        </div>
+
+                        {/* Action Button */}
+                        <div className="relative z-10 pt-2 sm:pt-4">
+                            <a
+                                href="https://www.usimsa.com/partners/airpick"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-[#d5a342] hover:bg-[#c39232] active:scale-[0.99] text-slate-950 font-black py-4 sm:py-5 px-6 rounded-2xl flex items-center justify-center gap-2 text-sm sm:text-lg shadow-xl shadow-amber-950/30 transition-all cursor-pointer group"
+                            >
+                                <span>유심사 30% 할인링크 바로가기</span>
+                                <ExternalLink size={18} className="sm:size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            </a>
                         </div>
                     </div>
                 </div>
